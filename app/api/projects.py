@@ -5,7 +5,7 @@ from typing import List
 
 from app.core import get_current_active_user, get_db
 from app.db import crud, models
-from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectResponse, MessageCreate, MessageResponse
+from app.schemas.project import ProjectCreate, ProjectResponse, MessageCreate, MessageResponse
 from app.utils.gcs import upload_file_to_gcs
 
 router = APIRouter()
@@ -16,7 +16,7 @@ def create_project(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user)
 ):
-    new_project = crud.create_project(db, user=current_user, pictures=project.pictures, explanation=project.explanation)
+    new_project = crud.create_project(db, user=current_user, pictures=[], explanation=project.explanation)
     return new_project
 
 @router.get("/", response_model=List[ProjectResponse])

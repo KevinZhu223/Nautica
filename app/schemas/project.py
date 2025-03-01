@@ -4,18 +4,15 @@ from typing import List, Optional
 from datetime import datetime
 
 class ProjectBase(BaseModel):
-    pictures: Optional[List[str]] = []
     explanation: Optional[dict] = {}
 
 class ProjectCreate(ProjectBase):
     pass
 
-class ProjectUpdate(ProjectBase):
-    pass
-
 class ProjectResponse(ProjectBase):
     id: int
     user_id: int
+    pictures: List[str] = []  # This will be an empty list initially
     created_at: datetime
     updated_at: datetime
 

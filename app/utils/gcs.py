@@ -11,4 +11,4 @@ def upload_file_to_gcs(file: UploadFile) -> str:
     file_name = f"document_{int(time.time())}_{file.filename}"
     blob = bucket.blob(file_name)
     blob.upload_from_file(file.file)
-    return f"https://storage.googleapis.com/{settings.GCS_BUCKET_NAME}/{file_name}"
+    return f"https://storage.googleapis.com/{settings.BUCKET_NAME}/{file_name}"
