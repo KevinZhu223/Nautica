@@ -74,11 +74,12 @@
             color: #6c757d;
         }
 
-         /* Main content styles */
-         .main-content {
+        /* Main content styles */
+        .main-content {
             margin-left: 250px;
             flex-grow: 1;
-            padding: 20px;  /* Reduced from 300px to give space for images */
+            padding: 20px;
+            /* Reduced from 300px to give space for images */
         }
 
         /* Add new styles for images and title */
@@ -88,7 +89,8 @@
         }
 
         .logo-container img {
-            max-width: 350px;  /* Set a specific width for the SVG */
+            max-width: 350px;
+            /* Set a specific width for the SVG */
             height: auto;
             margin: 10px 0;
         }
@@ -198,6 +200,7 @@
         }
 
         /* Add new auth buttons styles */
+        /* Add new auth buttons styles */
         .auth-buttons {
             position: fixed;
             top: 20px;
@@ -211,8 +214,9 @@
             border-radius: 4px;
             cursor: pointer;
             font-weight: 500;
-            margin-left: 10px;
             transition: background-color 0.3s;
+            background-color: #2196F3;
+            color: white;
         }
 
         .login-button {
@@ -220,7 +224,7 @@
             color: white;
         }
 
-        .login-button:hover {
+        .auth-button:hover {
             background-color: #1976D2;
         }
 
@@ -389,10 +393,9 @@
 
 <body>
     <div class="auth-buttons">
-        <a href="./login.html" class="auth-button login-button">Login</a>
-        <a href="./login.html?tab=signup" class="auth-button signup-button">Sign Up</a>
+        <a href="./login.html" class="auth-button">Login</a>
     </div>
-    
+
     <div class="app-layout">
         <!-- Sidebar with Project List -->
         <div class="sidebar">
