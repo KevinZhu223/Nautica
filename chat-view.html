@@ -4,49 +4,276 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document Translation - Chat View</title>
-    <link rel="stylesheet" href="styles.css">
+    <!-- Add styles directly to ensure they're working -->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            border-right: 1px solid #dee2e6;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+            background-color: white;
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        .chat-list {
+            padding: 10px;
+        }
+
+        .chat-item {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            background-color: white;
+        }
+
+        .chat-item:hover {
+            background-color: #e9ecef;
+        }
+
+        .chat-item.active {
+            background-color: #e3f2fd;
+        }
+
+        .chat-title {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .chat-date {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        /* Main content styles */
+        .main-content {
+            margin-left: 250px;
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Translation boxes styles */
+        .translation-boxes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .box {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .box h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 1.2rem;
+        }
+
+        .box-content {
+            min-height: 400px;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .placeholder-text {
+            color: #6c757d;
+            text-align: center;
+            margin-top: 180px;
+        }
+
+        #documentTitle {
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 2rem;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .translation-boxes {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                width: 200px;
+            }
+            
+            .main-content {
+                margin-left: 200px;
+            }
+        }
+
+        /* Add these new styles to your existing styles */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            color: #333;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+        }
+
+        .back-button:hover {
+            background-color: #e9ecef;
+            border-color: #ced4da;
+        }
+
+        .back-button::before {
+            content: "←";
+            margin-right: 8px;
+            font-size: 18px;
+        }
+
+        .header-section {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
     <div class="app-layout">
-        <!-- Keep the same sidebar for consistency -->
+        <!-- Sidebar with Project List -->
         <div class="sidebar">
             <div class="sidebar-header">
                 <h2>Project List</h2>
             </div>
             <div class="chat-list" id="chatList">
-                <!-- Chat items will be here -->
+                <!-- Adding active class to show current selection -->
+                <div class="chat-item">
+                    <div class="chat-title">Spanish Visa Application</div>
+                    <div class="chat-date">Mar 15, 2024</div>
+                </div>
+                <div class="chat-item">
+                    <div class="chat-title">Chinese Birth Certificate</div>
+                    <div class="chat-date">Mar 14, 2024</div>
+                </div>
+                <div class="chat-item">
+                    <div class="chat-title">French Work Permit</div>
+                    <div class="chat-date">Mar 13, 2024</div>
+                </div>
             </div>
         </div>
 
-        <!-- New chat view content -->
-        <div class="main-content chat-view">
-            <!-- Back button -->
-            <div class="chat-header">
-                <button class="back-button" onclick="window.location.href='index.html'">
-                    ← Back to Upload
-                </button>
-                <h2 id="documentTitle">Document Title</h2>
-            </div>
-
-            <!-- Chat/Translation area -->
-            <div class="chat-container">
-                <!-- Original document preview -->
-                <div class="document-preview">
-                    <h3>Original Document</h3>
-                    <div id="originalPreview" class="preview-box">
-                        <!-- Document preview will be displayed here -->
-                    </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="container">
+                <div class="header-section">
+                    <button onclick="window.location.href='index.html'" class="back-button">
+                        Back to Upload
+                    </button>
+                    <h1 id="documentTitle">Document Translation</h1>
                 </div>
-
-                <!-- Translation result -->
-                <div class="translation-result">
-                    <h3>Translation</h3>
-                    <div id="translationText" class="translation-box">
-                        <!-- Translated text will appear here -->
+                
+                <div class="translation-boxes">
+                    <div class="box original-document">
+                        <h3>Original Document</h3>
+                        <div class="box-content" id="originalContent">
+                            <p class="placeholder-text">Original document content will appear here</p>
+                        </div>
+                    </div>
+                    
+                    <div class="box translated-document">
+                        <h3>Translated Document</h3>
+                        <div class="box-content" id="translatedContent">
+                            <p class="placeholder-text">Translated content will appear here</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // Handle chat item clicks and maintain active state
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all chat items
+            const chatItems = document.querySelectorAll('.chat-item');
+            
+            // Get current chat from localStorage
+            const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
+            
+            // Update document title
+            if (currentChat.title) {
+                document.getElementById('documentTitle').textContent = currentChat.title;
+            }
+
+            // Set active state and handle clicks
+            chatItems.forEach(item => {
+                // Set active state for current chat
+                const itemTitle = item.querySelector('.chat-title').textContent;
+                if (currentChat.title === itemTitle) {
+                    item.classList.add('active');
+                }
+
+                // Handle click events
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    chatItems.forEach(chat => chat.classList.remove('active'));
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Store new selection
+                    const title = this.querySelector('.chat-title').textContent;
+                    const date = this.querySelector('.chat-date').textContent;
+                    
+                    localStorage.setItem('currentChat', JSON.stringify({
+                        title: title,
+                        date: date
+                    }));
+                    
+                    // Refresh page with new selection
+                    window.location.href = 'chat-view.html';
+                });
+            });
+        });
+    </script>
 </body>
 </html> 
