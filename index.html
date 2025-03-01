@@ -232,6 +232,158 @@
         .signup-button:hover {
             background-color: #6A5ACD;
         }
+
+        .process-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .process-button:hover {
+            background-color: #1976D2;
+        }
+
+        .file-list {
+            margin: 20px 0;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .preview-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #e3f2fd;
+            color: #1976d2;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .preview-button:hover {
+            background-color: #bbdefb;
+        }
+
+        .preview-container {
+            max-width: 1200px;
+            width: calc(100% - 290px); /* Account for sidebar width + padding */
+            margin: 20px 20px 20px 270px; /* Align with main content */
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .close-preview {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .carousel-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .carousel-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            padding: 15px;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .carousel-button.prev { left: 10px; }
+        .carousel-button.next { right: 10px; }
+
+        .preview-content {
+            width: 100%;
+            min-height: 600px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .preview-content iframe {
+            width: 100%;
+            height: 800px;
+            border: none;
+        }
+
+        .preview-content img {
+            max-width: 100%;
+            max-height: 800px;
+            object-fit: contain;
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background: #2196F3;
+        }
+
+        /* Add responsive adjustments */
+        @media (max-width: 768px) {
+            .preview-container {
+                width: calc(100% - 240px);
+                margin-left: 220px;
+            }
+        }
     </style>
 </head>
 
@@ -270,41 +422,194 @@
                 <img src="./images/full.svg" alt="Lexilytics Logo">
             </div>
             <div class="container">
-                <h1>Document Translation Assistant</h1>
+                <h1>Document Assistant</h1>
                 <div class="upload-section">
                     <label for="fileUpload" class="upload-button">
-                        Choose Document
-                        <input type="file" id="fileUpload" accept="image/*,.pdf,.doc,.docx" hidden>
+                        Choose Documents
+                        <input type="file" id="fileUpload" accept="image/*,.pdf,.doc,.docx" multiple hidden>
                     </label>
-                    <p id="fileName" class="file-name"></p>
+                    
+                    <div id="fileList" class="file-list"></div>
+                    
+                    <!-- Preview button -->
+                    <button id="previewBtn" class="preview-button" style="display: none;">
+                        Preview Documents
+                    </button>
+                    
+                    <button id="processBtn" class="process-button" style="display: none;">
+                        Analyze Documents
+                    </button>
                 </div>
-
-                <button id="translateBtn" class="translate-button" disabled>Translate Document</button>
             </div>
         </div>
     </div>
 
+    <!-- Preview carousel container -->
+    <div id="previewContainer" class="preview-container" style="display: none;">
+        <div class="preview-header">
+            <h3 id="previewTitle">Document Preview</h3>
+            <button id="closePreview" class="close-preview">×</button>
+        </div>
+        <div class="carousel-container">
+            <button class="carousel-button prev" id="prevBtn">❮</button>
+            <div id="previewContent" class="preview-content"></div>
+            <button class="carousel-button next" id="nextBtn">❯</button>
+        </div>
+        <div id="carouselDots" class="carousel-dots"></div>
+    </div>
+
     <script>
-        document.getElementById('fileUpload').addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (file) {
-                // Display file name
-                document.getElementById('fileName').textContent = `Selected file: ${file.name}`;
+        const fileUpload = document.getElementById('fileUpload');
+        const fileList = document.getElementById('fileList');
+        const previewBtn = document.getElementById('previewBtn');
+        const processBtn = document.getElementById('processBtn');
+        const previewContainer = document.getElementById('previewContainer');
+        let selectedFiles = [];
+        let currentPreviewIndex = 0;
 
-                // Enable translate button
-                document.getElementById('translateBtn').disabled = false;
+        fileUpload.addEventListener('change', function(e) {
+            const newFiles = Array.from(e.target.files);
+            selectedFiles = selectedFiles.concat(newFiles);
+            updateFileList();
+            this.value = '';
+        });
 
-                // Preview image if it's an image file
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        const preview = document.getElementById('preview');
-                        preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                    }
-                    reader.readAsDataURL(file);
-                } else {
-                    document.getElementById('preview').innerHTML = `<p>File selected: ${file.type}</p>`;
+        function updateFileList() {
+            fileList.innerHTML = '';
+            
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>${file.name}</span>
+                    <button class="remove-btn" data-index="${index}">×</button>
+                `;
+                fileList.appendChild(fileItem);
+            });
+
+            const hasFiles = selectedFiles.length > 0;
+            previewBtn.style.display = hasFiles ? 'block' : 'none';
+            processBtn.style.display = hasFiles ? 'block' : 'none';
+        }
+
+        fileList.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-btn')) {
+                const index = parseInt(e.target.dataset.index);
+                selectedFiles.splice(index, 1);
+                updateFileList();
+                if (selectedFiles.length === 0) {
+                    previewContainer.style.display = 'none';
                 }
+            }
+        });
+
+        previewBtn.addEventListener('click', function() {
+            if (selectedFiles.length > 0) {
+                showPreview(0);
+                previewContainer.style.display = 'block';
+                previewContainer.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+
+        document.getElementById('closePreview').addEventListener('click', function() {
+            previewContainer.style.display = 'none';
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', function() {
+            if (currentPreviewIndex > 0) {
+                showPreview(currentPreviewIndex - 1);
+            }
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', function() {
+            if (currentPreviewIndex < selectedFiles.length - 1) {
+                showPreview(currentPreviewIndex + 1);
+            }
+        });
+
+        function showPreview(index) {
+            currentPreviewIndex = index;
+            const file = selectedFiles[index];
+            document.getElementById('previewTitle').textContent = `Preview: ${file.name} (${index + 1}/${selectedFiles.length})`;
+            
+            const previewContent = document.getElementById('previewContent');
+            previewContent.innerHTML = '';
+
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '800px';
+                    previewContent.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            } else if (file.type === 'application/pdf') {
+                const objectUrl = URL.createObjectURL(file);
+                const iframe = document.createElement('iframe');
+                iframe.src = objectUrl;
+                previewContent.appendChild(iframe);
+            } else {
+                previewContent.innerHTML = '<p>Preview not available for this file type</p>';
+            }
+
+            updateCarouselDots();
+            updateNavigationButtons();
+        }
+
+        function updateCarouselDots() {
+            const dotsContainer = document.getElementById('carouselDots');
+            dotsContainer.innerHTML = '';
+            
+            selectedFiles.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.className = `dot${index === currentPreviewIndex ? ' active' : ''}`;
+                dot.addEventListener('click', () => showPreview(index));
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        function updateNavigationButtons() {
+            document.getElementById('prevBtn').style.display = currentPreviewIndex > 0 ? 'block' : 'none';
+            document.getElementById('nextBtn').style.display = currentPreviewIndex < selectedFiles.length - 1 ? 'block' : 'none';
+        }
+
+        processBtn.addEventListener('click', function() {
+            if (selectedFiles.length > 0) {
+                // Get existing projects or initialize empty array
+                const existingProjects = JSON.parse(localStorage.getItem('projectList') || '[]');
+                
+                // Create project name based on number of files
+                const projectName = selectedFiles.length === 1 
+                    ? selectedFiles[0].name 
+                    : `Document Set (${selectedFiles.length} files)`;
+                
+                // Add single project entry for all files
+                existingProjects.unshift({
+                    title: projectName,
+                    date: new Date().toLocaleDateString(),
+                    fileCount: selectedFiles.length,
+                    files: selectedFiles.map(f => f.name)
+                });
+                
+                // Save updated project list
+                localStorage.setItem('projectList', JSON.stringify(existingProjects));
+                
+                // Set current chat for chat view
+                localStorage.setItem('currentChat', JSON.stringify({
+                    title: projectName,
+                    date: new Date().toLocaleDateString(),
+                    isNewUpload: true,
+                    fileCount: selectedFiles.length,
+                    files: selectedFiles.map(f => f.name)
+                }));
+                
+                // Navigate to chat view
+                window.location.href = 'chat-view.html';
             }
         });
 
@@ -381,28 +686,6 @@
                 chatList.appendChild(chatItem);
             });
         }
-
-        // Update your existing translate button click handler
-        document.getElementById('translateBtn').addEventListener('click', function () {
-            const file = document.getElementById('fileUpload').files[0];
-
-            if (file) {
-                // Add to project list
-                addToProjectList(file.name);
-
-                // Store current file info
-                localStorage.setItem('currentChat', JSON.stringify({
-                    title: file.name,
-                    date: new Date().toLocaleDateString(),
-                    isNewUpload: true
-                }));
-
-                // Navigate to chat view
-                window.location.href = 'chat-view.html';
-            } else {
-                alert('Please select a file first');
-            }
-        });
 
         // Load projects when page loads
         document.addEventListener('DOMContentLoaded', loadProjectList);

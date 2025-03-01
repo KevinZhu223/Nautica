@@ -315,9 +315,17 @@
             projects.forEach(project => {
                 const chatItem = document.createElement('div');
                 chatItem.className = 'chat-item';
+                
+                // Create the project title display
+                const titleDisplay = project.fileCount > 1 
+                    ? `${project.title} (${project.fileCount} files)` 
+                    : project.title;
+                
                 chatItem.innerHTML = `
-                    <div class="chat-title">${project.title}</div>
-                    <div class="chat-date">${project.date}</div>
+                    <div>
+                        <div class="chat-title">${titleDisplay}</div>
+                        <div class="chat-date">${project.date}</div>
+                    </div>
                     <button class="delete-btn" title="Delete project">
                         <span class="trash-icon">🗑️</span>
                     </button>
@@ -326,34 +334,49 @@
             });
         }
 
-        // Add delete functionality
+        // Update click handler for project list items
         document.getElementById('chatList').addEventListener('click', function(e) {
+            const chatItem = e.target.closest('.chat-item');
+            if (!chatItem) return;
+
             if (e.target.closest('.delete-btn')) {
                 e.stopPropagation();
-                const chatItem = e.target.closest('.chat-item');
+                const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
+                const index = Array.from(chatList.children).indexOf(chatItem);
+                
                 if (confirm('Are you sure you want to delete this project?')) {
-                    chatItem.remove();
-                    // Save updated list
-                    const projects = [];
-                    document.querySelectorAll('.chat-item').forEach(item => {
-                        projects.push({
-                            title: item.querySelector('.chat-title').textContent,
-                            date: item.querySelector('.chat-date').textContent
-                        });
-                    });
+                    projects.splice(index, 1);
                     localStorage.setItem('projectList', JSON.stringify(projects));
-                    
-                    // If deleted current project, go back to index
-                    const currentTitle = document.getElementById('documentTitle').textContent;
-                    if (currentTitle === chatItem.querySelector('.chat-title').textContent) {
-                        window.location.href = 'index.html';
-                    }
+                    chatItem.remove();
                 }
+            } else {
+                const title = chatItem.querySelector('.chat-title').textContent;
+                const date = chatItem.querySelector('.chat-date').textContent;
+                const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
+                const index = Array.from(chatList.children).indexOf(chatItem);
+                const project = projects[index];
+                
+                localStorage.setItem('currentChat', JSON.stringify({
+                    title: project.title,
+                    date: project.date,
+                    fileCount: project.fileCount,
+                    files: project.files
+                }));
+                
+                window.location.href = 'chat-view.html';
             }
         });
 
-        // Load projects when page loads
-        document.addEventListener('DOMContentLoaded', loadProjectList);
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProjectList();
+            
+            // Load current chat
+            const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
+            if (currentChat.title) {
+                document.getElementById('documentTitle').textContent = currentChat.title;
+            }
+        });
     </script>
 </body>
 </html> 
