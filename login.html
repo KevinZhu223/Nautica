@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login & Signup</title>
+    <title>Login & Signup - Lexilytics</title>
     <style>
         * {
             margin: 0;
@@ -28,6 +28,16 @@
             box-shadow: 0 8px 24px rgba(0,0,0,0.2);
             width: 100%;
             max-width: 450px;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-container img {
+            max-width: 200px;
+            height: auto;
         }
 
         .tabs {
@@ -164,6 +174,10 @@
 </head>
 <body>
     <div class="container">
+        <div class="logo-container">
+            <img src="./images/full.svg" alt="Lexilytics Logo">
+        </div>
+        
         <div class="tabs">
             <div class="tab active" onclick="switchTab('login')">Login</div>
             <div class="tab" onclick="switchTab('signup')">Sign Up</div>
@@ -218,10 +232,10 @@
     </div>
 
     <script>
-        // API endpoints - replace these with your actual endpoints
+        // API endpoints
         const API_ENDPOINTS = {
-            login: 'https://your-api.com/login',
-            signup: 'https://your-api.com/signup'
+            login: 'http://localhost:8000/api/users/login',
+            signup: 'http://localhost:8000/api/users/signup'
         };
 
         // Token management functions
@@ -301,7 +315,7 @@
                 
                 // Redirect after successful login
                 setTimeout(() => {
-                    window.location.href = '/dashboard.html';
+                    window.location.href = 'index.html';
                 }, 1500);
 
             } catch (error) {
@@ -366,7 +380,7 @@
                 
                 // Redirect after successful signup
                 setTimeout(() => {
-                    window.location.href = '/dashboard.html';
+                    window.location.href = 'index.html';
                 }, 1500);
 
             } catch (error) {
@@ -377,11 +391,18 @@
             }
         });
 
-        // Check if user is already logged in
+        // Check URL parameters and login status on page load
         window.addEventListener('load', () => {
+            // Check for signup parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('tab') === 'signup') {
+                switchTab('signup');
+            }
+            
+            // Check if user is already logged in
             const token = getToken();
             if (token) {
-                window.location.href = '/dashboard.html';
+                window.location.href = 'index.html';
             }
         });
     </script>
