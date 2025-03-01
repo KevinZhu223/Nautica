@@ -74,12 +74,27 @@
             color: #6c757d;
         }
 
-        /* Main content styles */
-        .main-content {
+         /* Main content styles */
+         .main-content {
             margin-left: 250px;
             flex-grow: 1;
-            padding: 300px 20px 20px 20px;
-            /* Increased top padding from 80px to 120px */
+            padding: 20px;  /* Reduced from 300px to give space for images */
+        }
+
+        /* Add new styles for images and title */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-container img {
+            max-width: 350px;  /* Set a specific width for the SVG */
+            height: auto;
+            margin: 10px 0;
+        }
+
+        .container h1 {
+            text-align: center;
         }
 
         .container {
@@ -251,6 +266,9 @@
 
         <!-- Main Content -->
         <div class="main-content">
+            <div class="logo-container">
+                <img src="./images/full.svg" alt="Lexilytics Logo">
+            </div>
             <div class="container">
                 <h1>Document Translation Assistant</h1>
                 <div class="upload-section">
