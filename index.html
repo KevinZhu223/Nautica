@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Translation Helper</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Document Translation Assistant</h1>
+        <div class="upload-section">
+            <label for="fileUpload" class="upload-button">
+                Choose Document
+                <input type="file" id="fileUpload" accept="image/*,.pdf,.doc,.docx" hidden>
+            </label>
+            <p id="fileName" class="file-name"></p>
+        </div>
+        <div class="preview-section">
+            <h2>Document Preview</h2>
+            <div id="preview"></div>
+        </div>
+        <select id="targetLanguage" class="language-select">
+            <option value="">Select Target Language</option>
+            <option value="es">Spanish</option>
+            <option value="zh">Chinese</option>
+            <option value="ar">Arabic</option>
+            <option value="hi">Hindi</option>
+            <option value="fr">French</option>
+        </select>
+        <button id="translateBtn" class="translate-button" disabled>Translate Document</button>
+    </div>
+
+    <script>
+        document.getElementById('fileUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Display file name
+                document.getElementById('fileName').textContent = `Selected file: ${file.name}`;
+                
+                // Enable translate button
+                document.getElementById('translateBtn').disabled = false;
+                
+                // Preview image if it's an image file
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.getElementById('preview');
+                        preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    document.getElementById('preview').innerHTML = `<p>File selected: ${file.type}</p>`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
