@@ -7,28 +7,63 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Document Translation Assistant</h1>
-        <div class="upload-section">
-            <label for="fileUpload" class="upload-button">
-                Choose Document
-                <input type="file" id="fileUpload" accept="image/*,.pdf,.doc,.docx" hidden>
-            </label>
-            <p id="fileName" class="file-name"></p>
+    <!-- Main layout container that holds both sidebar and content -->
+    <div class="app-layout">
+        <!-- Sidebar container - fixed on the left side -->
+        <div class="sidebar">
+            <!-- Header section of the sidebar -->
+            <div class="sidebar-header">
+                <h2>Project List</h2>
+            </div>
+            
+            <!-- Container for the list of chat/project history -->
+            <div class="chat-list" id="chatList">
+                <!-- Individual chat history items -->
+                <!-- 'active' class shows which chat is currently selected -->
+                <div class="chat-item active">
+                    <div class="chat-title">Spanish Visa Application</div>
+                    <div class="chat-date">Mar 15, 2024</div>
+                </div>
+                
+                <!-- Example chat items - these would be dynamically generated in production -->
+                <div class="chat-item">
+                    <div class="chat-title">Chinese Birth Certificate</div>
+                    <div class="chat-date">Mar 14, 2024</div>
+                </div>
+                
+                <div class="chat-item">
+                    <div class="chat-title">French Work Permit</div>
+                    <div class="chat-date">Mar 13, 2024</div>
+                </div>
+            </div>
         </div>
-        <div class="preview-section">
-            <h2>Document Preview</h2>
-            <div id="preview"></div>
+
+        <!-- Main content area - contains the translation interface -->
+        <div class="main-content">
+            <div class="container">
+                <h1>Document Translation Assistant</h1>
+                <div class="upload-section">
+                    <label for="fileUpload" class="upload-button">
+                        Choose Document
+                        <input type="file" id="fileUpload" accept="image/*,.pdf,.doc,.docx" hidden>
+                    </label>
+                    <p id="fileName" class="file-name"></p>
+                </div>
+                <div class="preview-section">
+                    <h2>Document Preview</h2>
+                    <div id="preview"></div>
+                </div>
+                <select id="targetLanguage" class="language-select">
+                    <option value="">Select Target Language</option>
+                    <option value="es">Spanish</option>
+                    <option value="zh">Chinese</option>
+                    <option value="ar">Arabic</option>
+                    <option value="hi">Hindi</option>
+                    <option value="fr">French</option>
+                </select>
+                <button id="translateBtn" class="translate-button" disabled>Translate Document</button>
+            </div>
         </div>
-        <select id="targetLanguage" class="language-select">
-            <option value="">Select Target Language</option>
-            <option value="es">Spanish</option>
-            <option value="zh">Chinese</option>
-            <option value="ar">Arabic</option>
-            <option value="hi">Hindi</option>
-            <option value="fr">French</option>
-        </select>
-        <button id="translateBtn" class="translate-button" disabled>Translate Document</button>
     </div>
 
     <script>

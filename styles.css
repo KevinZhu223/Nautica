@@ -82,4 +82,109 @@ h1 {
 .translate-button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
+}
+
+/* Main layout container - uses flexbox for sidebar and main content arrangement */
+.app-layout {
+    display: flex;
+    min-height: 100vh; /* Ensures full height of viewport */
+}
+
+/* Sidebar styles */
+.sidebar {
+    width: 250px; /* Fixed width for sidebar */
+    background-color: #f8f9fa; /* Light background for contrast */
+    border-right: 1px solid #dee2e6; /* Separator between sidebar and content */
+    height: 100vh; /* Full viewport height */
+    position: fixed; /* Keeps sidebar fixed while scrolling */
+    left: 0;
+    top: 0;
+}
+
+/* Sidebar header section */
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #dee2e6; /* Separator below header */
+}
+
+/* Header text styling */
+.sidebar-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+/* Container for chat history items */
+.chat-list {
+    padding: 10px;
+}
+
+/* Individual chat item styling */
+.chat-item {
+    padding: 15px;
+    border-radius: 8px; /* Rounded corners */
+    margin-bottom: 8px; /* Space between items */
+    cursor: pointer; /* Shows item is clickable */
+    transition: background-color 0.2s ease; /* Smooth hover effect */
+}
+
+/* Hover effect for chat items */
+.chat-item:hover {
+    background-color: #e9ecef; /* Light grey background on hover */
+}
+
+/* Style for the currently selected chat */
+.chat-item.active {
+    background-color: #e3f2fd; /* Light blue background for active item */
+}
+
+/* Chat title styling */
+.chat-title {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+/* Date display styling */
+.chat-date {
+    font-size: 0.8rem; /* Smaller text for date */
+    color: #6c757d; /* Grey color for less emphasis */
+}
+
+/* Main content area styling */
+.main-content {
+    margin-left: 250px; /* Matches sidebar width to prevent overlap */
+    padding: 20px;
+    flex-grow: 1; /* Allows content to fill remaining space */
+}
+
+/* Container for the main content */
+.container {
+    max-width: 800px; /* Limits content width for readability */
+    margin: 0 auto; /* Centers the container */
+    padding: 20px;
+}
+
+/* Optional: Add these utility classes for responsive design */
+
+/* Hide sidebar on small screens */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none; /* Hides sidebar on mobile */
+    }
+    
+    .main-content {
+        margin-left: 0; /* Removes margin when sidebar is hidden */
+    }
+}
+
+/* Optional: Add smooth transitions for better UX */
+.chat-item {
+    /* Smooth transition for all hover effects */
+    transition: all 0.2s ease-in-out;
+}
+
+/* Optional: Add shadow to active item for depth */
+.chat-item.active {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 } 
