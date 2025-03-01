@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -77,7 +78,8 @@
         .main-content {
             margin-left: 250px;
             flex-grow: 1;
-            padding: 20px;
+            padding: 300px 20px 20px 20px;
+            /* Increased top padding from 80px to 120px */
         }
 
         .container {
@@ -86,7 +88,7 @@
             padding: 20px;
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         /* Existing upload section styles */
@@ -142,7 +144,7 @@
             .sidebar {
                 width: 200px;
             }
-            
+
             .main-content {
                 margin-left: 200px;
             }
@@ -150,7 +152,8 @@
 
         .chat-item {
             position: relative;
-            padding-right: 40px; /* Make room for delete button */
+            padding-right: 40px;
+            /* Make room for delete button */
         }
 
         .delete-btn {
@@ -178,9 +181,52 @@
         .trash-icon {
             font-size: 16px;
         }
+
+        /* Add new auth buttons styles */
+        .auth-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .auth-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .login-button {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .login-button:hover {
+            background-color: #1976D2;
+        }
+
+        .signup-button {
+            background-color: #7B68EE;
+            color: white;
+        }
+
+        .signup-button:hover {
+            background-color: #6A5ACD;
+        }
     </style>
 </head>
+
 <body>
+    <!-- Add auth buttons before app-layout -->
+    <div class="auth-buttons">
+        <button class="auth-button login-button">Login</button>
+        <button class="auth-button signup-button">Sign Up</button>
+    </div>
+
     <div class="app-layout">
         <!-- Sidebar with Project List -->
         <div class="sidebar">
@@ -221,19 +267,19 @@
     </div>
 
     <script>
-        document.getElementById('fileUpload').addEventListener('change', function(e) {
+        document.getElementById('fileUpload').addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (file) {
                 // Display file name
                 document.getElementById('fileName').textContent = `Selected file: ${file.name}`;
-                
+
                 // Enable translate button
                 document.getElementById('translateBtn').disabled = false;
-                
+
                 // Preview image if it's an image file
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
-                    reader.onload = function(e) {
+                    reader.onload = function (e) {
                         const preview = document.getElementById('preview');
                         preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
                     }
@@ -246,15 +292,15 @@
 
         // Handle chat item clicks
         document.querySelectorAll('.chat-item').forEach(item => {
-            item.addEventListener('click', function() {
+            item.addEventListener('click', function () {
                 const title = this.querySelector('.chat-title').textContent;
                 const date = this.querySelector('.chat-date').textContent;
-                
+
                 localStorage.setItem('currentChat', JSON.stringify({
                     title: title,
                     date: date
                 }));
-                
+
                 window.location.href = 'chat-view.html';
             });
         });
@@ -319,20 +365,20 @@
         }
 
         // Update your existing translate button click handler
-        document.getElementById('translateBtn').addEventListener('click', function() {
+        document.getElementById('translateBtn').addEventListener('click', function () {
             const file = document.getElementById('fileUpload').files[0];
-            
+
             if (file) {
                 // Add to project list
                 addToProjectList(file.name);
-                
+
                 // Store current file info
                 localStorage.setItem('currentChat', JSON.stringify({
                     title: file.name,
                     date: new Date().toLocaleDateString(),
                     isNewUpload: true
                 }));
-                
+
                 // Navigate to chat view
                 window.location.href = 'chat-view.html';
             } else {
@@ -344,7 +390,7 @@
         document.addEventListener('DOMContentLoaded', loadProjectList);
 
         // Add event delegation for delete buttons
-        document.getElementById('chatList').addEventListener('click', function(e) {
+        document.getElementById('chatList').addEventListener('click', function (e) {
             if (e.target.closest('.delete-btn')) {
                 e.stopPropagation(); // Prevent navigation when clicking delete
                 const chatItem = e.target.closest('.chat-item');
@@ -356,4 +402,5 @@
         });
     </script>
 </body>
+
 </html>
