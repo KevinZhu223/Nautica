@@ -234,18 +234,18 @@
     <script>
         // API endpoints
         const API_ENDPOINTS = {
-            login: 'http://localhost:8000/api/users/login',
-            signup: 'http://localhost:8000/api/users/signup'
-        };
+        login: 'http://rnadj-128-180-243-28.a.free.pinggy.link/api/users/login',
+        signup: 'http://rnadj-128-180-243-28.a.free.pinggy.link/api/users/register'
+    };
 
         // Token management functions
         function saveToken(token) {
-            localStorage.setItem('userToken', token);
-        }
+        localStorage.setItem('userToken', token);
+    }
 
-        function getToken() {
-            return localStorage.getItem('userToken');
-        }
+    function saveUserData(userData) {
+        localStorage.setItem('userData', JSON.stringify(userData));
+    }
 
         function removeToken() {
             localStorage.removeItem('userToken');
@@ -338,7 +338,7 @@
             successMessage.style.display = 'none';
             loadingIndicator.style.display = 'block';
 
-            const username = document.getElementById('signupUsername').value;
+            const name = document.getElementById('signupUsername').value;
             const email = document.getElementById('signupEmail').value;
             const password = document.getElementById('signupPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
@@ -365,7 +365,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ username, email, password })
+                    body: JSON.stringify({ name, email, password })
                 });
 
                 const data = await response.json();
