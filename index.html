@@ -582,15 +582,36 @@
 
         processBtn.addEventListener('click', function() {
             if (selectedFiles.length > 0) {
-                // Get existing projects or initialize empty array
                 const existingProjects = JSON.parse(localStorage.getItem('projectList') || '[]');
                 
-                // Create project name based on number of files
-                const projectName = selectedFiles.length === 1 
-                    ? selectedFiles[0].name 
-                    : `Document Set (${selectedFiles.length} files)`;
+                // Create a more descriptive project name for multiple files
+                let projectName;
+                if (selectedFiles.length === 1) {
+                    projectName = selectedFiles[0].name;
+                } else {
+                    // Get file types present in the set
+                    const fileTypes = [...new Set(selectedFiles.map(file => {
+                        const ext = file.name.split('.').pop().toLowerCase();
+                        switch(ext) {
+                            case 'pdf': return 'PDF';
+                            case 'doc':
+                            case 'docx': return 'Word';
+                            case 'jpg':
+                            case 'jpeg':
+                            case 'png': return 'Image';
+                            default: return 'Document';
+                        }
+                    }))];
+
+                    // Create descriptive name using first file and types
+                    const firstFileName = selectedFiles[0].name.split('.')[0];
+                    const typeDescription = fileTypes.join('/');
+                    const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    projectName = `${firstFileName} + ${selectedFiles.length - 1} ${typeDescription} files (${timestamp})`;
+                }
                 
-                // Add single project entry for all files
+                // Add project entry
                 existingProjects.unshift({
                     title: projectName,
                     date: new Date().toLocaleDateString(),
@@ -598,10 +619,8 @@
                     files: selectedFiles.map(f => f.name)
                 });
                 
-                // Save updated project list
                 localStorage.setItem('projectList', JSON.stringify(existingProjects));
                 
-                // Set current chat for chat view
                 localStorage.setItem('currentChat', JSON.stringify({
                     title: projectName,
                     date: new Date().toLocaleDateString(),
@@ -610,7 +629,6 @@
                     files: selectedFiles.map(f => f.name)
                 }));
                 
-                // Navigate to chat view
                 window.location.href = 'chat-view.html';
             }
         });
@@ -692,15 +710,36 @@
         // Load projects when page loads
         document.addEventListener('DOMContentLoaded', loadProjectList);
 
-        // Add event delegation for delete buttons
-        document.getElementById('chatList').addEventListener('click', function (e) {
+        // Add click handler for project list items
+        document.getElementById('chatList').addEventListener('click', function(e) {
+            const chatItem = e.target.closest('.chat-item');
+            if (!chatItem) return;
+
             if (e.target.closest('.delete-btn')) {
-                e.stopPropagation(); // Prevent navigation when clicking delete
-                const chatItem = e.target.closest('.chat-item');
+                e.stopPropagation();
+                const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
+                const index = Array.from(chatList.children).indexOf(chatItem);
+                
                 if (confirm('Are you sure you want to delete this project?')) {
+                    projects.splice(index, 1);
+                    localStorage.setItem('projectList', JSON.stringify(projects));
                     chatItem.remove();
-                    saveProjectList();
                 }
+            } else {
+                const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
+                const index = Array.from(chatList.children).indexOf(chatItem);
+                const project = projects[index];
+                
+                // Store the selected project's chat history
+                localStorage.setItem('currentChat', JSON.stringify({
+                    title: project.title,
+                    date: project.date,
+                    fileCount: project.fileCount,
+                    files: project.files,
+                    chatHistory: project.chatHistory || [] // Preserve chat history if it exists
+                }));
+                
+                window.location.href = 'chat-view.html';
             }
         });
     </script>
