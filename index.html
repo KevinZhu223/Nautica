@@ -147,6 +147,37 @@
                 margin-left: 200px;
             }
         }
+
+        .chat-item {
+            position: relative;
+            padding-right: 40px; /* Make room for delete button */
+        }
+
+        .delete-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .chat-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            background-color: #ffebee;
+        }
+
+        .trash-icon {
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -228,12 +259,74 @@
             });
         });
 
-        // NEW CODE: Handle translate button click
+        // Function to add new document to project list
+        function addToProjectList(fileName) {
+            const chatList = document.getElementById('chatList');
+            const currentDate = new Date().toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+
+            // Create new chat item
+            const newChatItem = document.createElement('div');
+            newChatItem.className = 'chat-item';
+            newChatItem.innerHTML = `
+                <div class="chat-title">${fileName}</div>
+                <div class="chat-date">${currentDate}</div>
+                <button class="delete-btn" title="Delete project">
+                    <span class="trash-icon">🗑️</span>
+                </button>
+            `;
+
+            // Add to the beginning of the list
+            chatList.insertBefore(newChatItem, chatList.firstChild);
+
+            // Save to localStorage
+            saveProjectList();
+        }
+
+        // Function to save project list to localStorage
+        function saveProjectList() {
+            const projects = [];
+            document.querySelectorAll('.chat-item').forEach(item => {
+                projects.push({
+                    title: item.querySelector('.chat-title').textContent,
+                    date: item.querySelector('.chat-date').textContent
+                });
+            });
+            localStorage.setItem('projectList', JSON.stringify(projects));
+        }
+
+        // Function to load project list from localStorage
+        function loadProjectList() {
+            const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
+            const chatList = document.getElementById('chatList');
+            chatList.innerHTML = ''; // Clear existing items
+
+            projects.forEach(project => {
+                const chatItem = document.createElement('div');
+                chatItem.className = 'chat-item';
+                chatItem.innerHTML = `
+                    <div class="chat-title">${project.title}</div>
+                    <div class="chat-date">${project.date}</div>
+                    <button class="delete-btn" title="Delete project">
+                        <span class="trash-icon">🗑️</span>
+                    </button>
+                `;
+                chatList.appendChild(chatItem);
+            });
+        }
+
+        // Update your existing translate button click handler
         document.getElementById('translateBtn').addEventListener('click', function() {
             const file = document.getElementById('fileUpload').files[0];
             
             if (file) {
-                // Store file information
+                // Add to project list
+                addToProjectList(file.name);
+                
+                // Store current file info
                 localStorage.setItem('currentChat', JSON.stringify({
                     title: file.name,
                     date: new Date().toLocaleDateString(),
@@ -247,15 +340,19 @@
             }
         });
 
-        // Optional: Handle active state
-        const chatItems = document.querySelectorAll('.chat-item');
-        chatItems.forEach(item => {
-            item.addEventListener('click', function() {
-                // Remove active class from all items
-                chatItems.forEach(chat => chat.classList.remove('active'));
-                // Add active class to clicked item
-                this.classList.add('active');
-            });
+        // Load projects when page loads
+        document.addEventListener('DOMContentLoaded', loadProjectList);
+
+        // Add event delegation for delete buttons
+        document.getElementById('chatList').addEventListener('click', function(e) {
+            if (e.target.closest('.delete-btn')) {
+                e.stopPropagation(); // Prevent navigation when clicking delete
+                const chatItem = e.target.closest('.chat-item');
+                if (confirm('Are you sure you want to delete this project?')) {
+                    chatItem.remove();
+                    saveProjectList();
+                }
+            }
         });
     </script>
 </body>

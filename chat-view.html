@@ -175,6 +175,37 @@
             flex-direction: column;
             margin-bottom: 20px;
         }
+
+        .chat-item {
+            position: relative;
+            padding-right: 40px;
+        }
+
+        .delete-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .chat-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            background-color: #ffebee;
+        }
+
+        .trash-icon {
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -274,6 +305,55 @@
                 });
             });
         });
+
+        // Function to load project list (same as index.html)
+        function loadProjectList() {
+            const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
+            const chatList = document.getElementById('chatList');
+            chatList.innerHTML = '';
+
+            projects.forEach(project => {
+                const chatItem = document.createElement('div');
+                chatItem.className = 'chat-item';
+                chatItem.innerHTML = `
+                    <div class="chat-title">${project.title}</div>
+                    <div class="chat-date">${project.date}</div>
+                    <button class="delete-btn" title="Delete project">
+                        <span class="trash-icon">🗑️</span>
+                    </button>
+                `;
+                chatList.appendChild(chatItem);
+            });
+        }
+
+        // Add delete functionality
+        document.getElementById('chatList').addEventListener('click', function(e) {
+            if (e.target.closest('.delete-btn')) {
+                e.stopPropagation();
+                const chatItem = e.target.closest('.chat-item');
+                if (confirm('Are you sure you want to delete this project?')) {
+                    chatItem.remove();
+                    // Save updated list
+                    const projects = [];
+                    document.querySelectorAll('.chat-item').forEach(item => {
+                        projects.push({
+                            title: item.querySelector('.chat-title').textContent,
+                            date: item.querySelector('.chat-date').textContent
+                        });
+                    });
+                    localStorage.setItem('projectList', JSON.stringify(projects));
+                    
+                    // If deleted current project, go back to index
+                    const currentTitle = document.getElementById('documentTitle').textContent;
+                    if (currentTitle === chatItem.querySelector('.chat-title').textContent) {
+                        window.location.href = 'index.html';
+                    }
+                }
+            }
+        });
+
+        // Load projects when page loads
+        document.addEventListener('DOMContentLoaded', loadProjectList);
     </script>
 </body>
 </html> 
