@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Translation - Chat View</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Keep the same sidebar for consistency -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Project List</h2>
+            </div>
+            <div class="chat-list" id="chatList">
+                <!-- Chat items will be here -->
+            </div>
+        </div>
+
+        <!-- New chat view content -->
+        <div class="main-content chat-view">
+            <!-- Back button -->
+            <div class="chat-header">
+                <button class="back-button" onclick="window.location.href='index.html'">
+                    ← Back to Upload
+                </button>
+                <h2 id="documentTitle">Document Title</h2>
+            </div>
+
+            <!-- Chat/Translation area -->
+            <div class="chat-container">
+                <!-- Original document preview -->
+                <div class="document-preview">
+                    <h3>Original Document</h3>
+                    <div id="originalPreview" class="preview-box">
+                        <!-- Document preview will be displayed here -->
+                    </div>
+                </div>
+
+                <!-- Translation result -->
+                <div class="translation-result">
+                    <h3>Translation</h3>
+                    <div id="translationText" class="translation-box">
+                        <!-- Translated text will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

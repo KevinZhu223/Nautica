@@ -84,107 +84,69 @@ h1 {
     cursor: not-allowed;
 }
 
-/* Main layout container - uses flexbox for sidebar and main content arrangement */
+/* Main layout styles */
 .app-layout {
     display: flex;
-    min-height: 100vh; /* Ensures full height of viewport */
+    min-height: 100vh;
 }
 
-/* Sidebar styles */
+/* Sidebar styles - fixed on the left */
 .sidebar {
-    width: 250px; /* Fixed width for sidebar */
-    background-color: #f8f9fa; /* Light background for contrast */
-    border-right: 1px solid #dee2e6; /* Separator between sidebar and content */
-    height: 100vh; /* Full viewport height */
-    position: fixed; /* Keeps sidebar fixed while scrolling */
+    width: 250px;
+    background-color: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    height: 100vh;
+    position: fixed;
     left: 0;
     top: 0;
+    overflow-y: auto; /* Allows scrolling if content is too long */
 }
 
-/* Sidebar header section */
 .sidebar-header {
     padding: 20px;
-    border-bottom: 1px solid #dee2e6; /* Separator below header */
+    border-bottom: 1px solid #dee2e6;
 }
 
-/* Header text styling */
 .sidebar-header h2 {
     margin: 0;
     color: #333;
     font-size: 1.5rem;
 }
 
-/* Container for chat history items */
 .chat-list {
     padding: 10px;
 }
 
-/* Individual chat item styling */
 .chat-item {
     padding: 15px;
-    border-radius: 8px; /* Rounded corners */
-    margin-bottom: 8px; /* Space between items */
-    cursor: pointer; /* Shows item is clickable */
-    transition: background-color 0.2s ease; /* Smooth hover effect */
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
-/* Hover effect for chat items */
 .chat-item:hover {
-    background-color: #e9ecef; /* Light grey background on hover */
+    background-color: #e9ecef;
 }
 
-/* Style for the currently selected chat */
 .chat-item.active {
-    background-color: #e3f2fd; /* Light blue background for active item */
+    background-color: #e3f2fd;
 }
 
-/* Chat title styling */
 .chat-title {
     font-weight: 500;
     color: #333;
     margin-bottom: 5px;
 }
 
-/* Date display styling */
 .chat-date {
-    font-size: 0.8rem; /* Smaller text for date */
-    color: #6c757d; /* Grey color for less emphasis */
+    font-size: 0.8rem;
+    color: #6c757d;
 }
 
-/* Main content area styling */
+/* Main content area - adjusted to account for fixed sidebar */
 .main-content {
-    margin-left: 250px; /* Matches sidebar width to prevent overlap */
+    margin-left: 250px; /* Same as sidebar width */
+    flex-grow: 1;
     padding: 20px;
-    flex-grow: 1; /* Allows content to fill remaining space */
-}
-
-/* Container for the main content */
-.container {
-    max-width: 800px; /* Limits content width for readability */
-    margin: 0 auto; /* Centers the container */
-    padding: 20px;
-}
-
-/* Optional: Add these utility classes for responsive design */
-
-/* Hide sidebar on small screens */
-@media (max-width: 768px) {
-    .sidebar {
-        display: none; /* Hides sidebar on mobile */
-    }
-    
-    .main-content {
-        margin-left: 0; /* Removes margin when sidebar is hidden */
-    }
-}
-
-/* Optional: Add smooth transitions for better UX */
-.chat-item {
-    /* Smooth transition for all hover effects */
-    transition: all 0.2s ease-in-out;
-}
-
-/* Optional: Add shadow to active item for depth */
-.chat-item.active {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 } 

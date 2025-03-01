@@ -89,6 +89,51 @@
                 }
             }
         });
+
+        // Handle chat item clicks
+        document.querySelectorAll('.chat-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const title = this.querySelector('.chat-title').textContent;
+                const date = this.querySelector('.chat-date').textContent;
+                
+                localStorage.setItem('currentChat', JSON.stringify({
+                    title: title,
+                    date: date
+                }));
+                
+                window.location.href = 'chat-view.html';
+            });
+        });
+
+        // NEW CODE: Handle translate button click
+        document.getElementById('translateBtn').addEventListener('click', function() {
+            const file = document.getElementById('fileUpload').files[0];
+            
+            if (file) {
+                // Store file information
+                localStorage.setItem('currentChat', JSON.stringify({
+                    title: file.name,
+                    date: new Date().toLocaleDateString(),
+                    isNewUpload: true
+                }));
+                
+                // Navigate to chat view
+                window.location.href = 'chat-view.html';
+            } else {
+                alert('Please select a file first');
+            }
+        });
+
+        // Optional: Handle active state
+        const chatItems = document.querySelectorAll('.chat-item');
+        chatItems.forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all items
+                chatItems.forEach(chat => chat.classList.remove('active'));
+                // Add active class to clicked item
+                this.classList.add('active');
+            });
+        });
     </script>
 </body>
 </html>
