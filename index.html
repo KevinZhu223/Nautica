@@ -10,36 +10,42 @@
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            background-color: #f8f9fa;
+            color: #2c3e50;
         }
 
         .app-layout {
             display: flex;
             min-height: 100vh;
+            position: relative;
+            padding-top: 20px;
         }
 
         /* Sidebar styles */
         .sidebar {
             width: 250px;
-            background-color: white;
+            background-color: #ffffff;
             border-right: 1px solid #dee2e6;
             height: 100vh;
             position: fixed;
             left: 0;
             top: 0;
             overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
         }
 
         .sidebar-header {
-            padding: 20px;
+            padding: 25px 20px;
             border-bottom: 1px solid #dee2e6;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
             background-color: white;
         }
 
         .sidebar-header h2 {
             margin: 0;
-            color: #333;
-            font-size: 1.5rem;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 600;
         }
 
         .chat-list {
@@ -48,15 +54,19 @@
 
         .chat-item {
             padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 8px;
+            border-radius: 10px;
+            margin-bottom: 12px;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            transition: all 0.3s ease;
             background-color: white;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
         .chat-item:hover {
-            background-color: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: #2196F3;
         }
 
         .chat-item.active {
@@ -64,14 +74,15 @@
         }
 
         .chat-title {
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 5px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #2c3e50;
         }
 
         .chat-date {
             font-size: 0.8rem;
-            color: #6c757d;
+            color: #7f8c8d;
+            margin-top: 5px;
         }
 
         /* Main content styles */
@@ -79,33 +90,41 @@
             margin-left: 250px;
             flex-grow: 1;
             padding: 20px;
-            /* Reduced from 300px to give space for images */
+            position: relative;
         }
 
         /* Add new styles for images and title */
         .logo-container {
             text-align: center;
             margin-bottom: 20px;
+            width: 100%;
         }
 
         .logo-container img {
             max-width: 350px;
-            /* Set a specific width for the SVG */
             height: auto;
-            margin: 10px 0;
-        }
-
-        .container h1 {
-            text-align: center;
+            margin: 10px auto;
+            display: block;
         }
 
         .container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .container h1 {
+            color: #2c3e50;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+            width: 100%;
+            display: block;
         }
 
         /* Existing upload section styles */
@@ -116,17 +135,20 @@
 
         .upload-button {
             display: inline-block;
-            padding: 12px 24px;
-            background-color: #2196F3;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(33,150,243,0.3);
         }
 
         .upload-button:hover {
-            background-color: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(33,150,243,0.4);
         }
 
         .file-name {
@@ -201,56 +223,48 @@
 
         /* Auth button styles */
         .auth-buttons {
-            position: absolute;
+            position: fixed;
             top: 20px;
             right: 20px;
-            z-index: 1000;
+            z-index: 1001;
+            width: auto;
         }
 
         .auth-button {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.3s;
-            background-color: #2196F3;
+            position: relative;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
             color: white;
-        }
-
-        .login-button {
-            background-color: #2196F3;
-            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
         }
 
         .auth-button:hover {
-            background-color: #1976D2;
-        }
-
-        .signup-button {
-            background-color: #7B68EE;
-            color: white;
-        }
-
-        .signup-button:hover {
-            background-color: #6A5ACD;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(33,150,243,0.3);
         }
 
         .process-button {
             display: block;
             width: 100%;
             padding: 12px;
-            background-color: #2196F3;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
             margin-top: 20px;
             transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(33,150,243,0.3);
         }
 
         .process-button:hover {
-            background-color: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(33,150,243,0.4);
         }
 
         .file-list {
@@ -261,48 +275,64 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px;
-            margin: 5px 0;
+            padding: 12px 15px;
+            margin: 8px 0;
             background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover {
+            background: #fff;
+            border-color: #2196F3;
+            transform: translateX(5px);
         }
 
         .remove-btn {
             background: none;
             border: none;
-            color: #dc3545;
+            color: #e74c3c;
             cursor: pointer;
             padding: 5px 10px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            color: #c0392b;
+            transform: scale(1.2);
         }
 
         .preview-button {
             display: block;
             width: 100%;
             padding: 12px;
-            background-color: #e3f2fd;
+            background: #e3f2fd;
             color: #1976d2;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
             margin: 20px 0;
             transition: all 0.3s ease;
+            font-weight: 600;
         }
 
         .preview-button:hover {
-            background-color: #bbdefb;
+            background: #bbdefb;
+            transform: translateY(-2px);
         }
 
         .preview-container {
+            position: relative;
             max-width: 1200px;
             width: calc(100% - 290px);
-            /* Account for sidebar width + padding */
             margin: 20px 20px 20px 270px;
-            /* Align with main content */
             padding: 20px;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 1;
         }
 
         .preview-header {
@@ -394,6 +424,30 @@
                 margin-left: 220px;
             }
         }
+
+        /* Add loading animation */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .processing {
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Empty state styling */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #bdc3c7;
+        }
     </style>
 </head>
 
@@ -421,6 +475,10 @@
                     <div class="chat-title">French Work Permit</div>
                     <div class="chat-date">Mar 13, 2024</div>
                 </div>
+            </div>
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <i>📁</i>
+                <p>No projects yet. Upload some documents to get started!</p>
             </div>
         </div>
 
@@ -511,13 +569,16 @@
             }
         });
 
-        previewBtn.addEventListener('click', function () {
+        previewBtn.addEventListener('click', function() {
             if (selectedFiles.length > 0) {
                 showPreview(0);
                 previewContainer.style.display = 'block';
-                previewContainer.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
+                
+                // Update scrolling behavior
+                const previewOffset = previewContainer.offsetTop;
+                window.scrollTo({
+                    top: previewOffset,
+                    behavior: 'smooth'
                 });
             }
         });
@@ -588,6 +649,8 @@
 
         processBtn.addEventListener('click', function() {
             if (selectedFiles.length > 0) {
+                this.classList.add('processing');
+                this.textContent = 'Processing...';
                 const existingProjects = JSON.parse(localStorage.getItem('projectList') || '[]');
                 
                 // Create a more descriptive project name for multiple files
@@ -748,6 +811,19 @@
                 window.location.href = 'chat-view.html';
             }
         });
+
+        function updateEmptyState() {
+            const chatList = document.getElementById('chatList');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (chatList.children.length === 0) {
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', updateEmptyState);
     </script>
 </body>
 
