@@ -206,6 +206,34 @@
         .trash-icon {
             font-size: 16px;
         }
+
+        .message {
+            margin: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 70%;
+        }
+
+        .message.user {
+            background: #e3f2fd;
+            margin-left: auto;
+        }
+
+        .message.ai {
+            background: #f5f5f5;
+            margin-right: auto;
+        }
+
+        .message-content {
+            word-wrap: break-word;
+        }
+
+        .timestamp {
+            font-size: 0.8em;
+            color: #666;
+            display: block;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -262,77 +290,100 @@
     </div>
 
     <script>
-        // Handle chat item clicks and maintain active state
+        // Add chat history functionality
+        let chatHistory = [];
+        const chatContainer = document.getElementById('chatContainer');
+        const messageInput = document.getElementById('messageInput');
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Get all chat items
-            const chatItems = document.querySelectorAll('.chat-item');
+            loadProjectList();
             
-            // Get current chat from localStorage
+            // Load current chat and its history
             const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
-            
-            // Update document title
             if (currentChat.title) {
-                document.getElementById('documentTitle').textContent = currentChat.title;
-            }
-
-            // Set active state and handle clicks
-            chatItems.forEach(item => {
-                // Set active state for current chat
-                const itemTitle = item.querySelector('.chat-title').textContent;
-                if (currentChat.title === itemTitle) {
-                    item.classList.add('active');
+                let displayTitle = currentChat.title;
+                if (displayTitle.includes('files)')) {
+                    displayTitle = displayTitle.replace(/\s*\(\d+\s*files\)\s*\(\d+\s*files\)/, ' ($1 files)');
                 }
-
-                // Handle click events
-                item.addEventListener('click', function() {
-                    // Remove active class from all items
-                    chatItems.forEach(chat => chat.classList.remove('active'));
-                    
-                    // Add active class to clicked item
-                    this.classList.add('active');
-                    
-                    // Store new selection
-                    const title = this.querySelector('.chat-title').textContent;
-                    const date = this.querySelector('.chat-date').textContent;
-                    
-                    localStorage.setItem('currentChat', JSON.stringify({
-                        title: title,
-                        date: date
-                    }));
-                    
-                    // Refresh page with new selection
-                    window.location.href = 'chat-view.html';
-                });
-            });
+                document.getElementById('documentTitle').textContent = displayTitle;
+                
+                // Load chat history if it exists
+                if (currentChat.chatHistory) {
+                    chatHistory = currentChat.chatHistory;
+                    displayChatHistory();
+                }
+            }
         });
 
-        // Function to load project list (same as index.html)
-        function loadProjectList() {
-            const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
-            const chatList = document.getElementById('chatList');
-            chatList.innerHTML = '';
-
-            projects.forEach(project => {
-                const chatItem = document.createElement('div');
-                chatItem.className = 'chat-item';
-                
-                // Create the project title display
-                const titleDisplay = project.fileCount > 1 
-                    ? `${project.title} (${project.fileCount} files)` 
-                    : project.title;
-                
-                chatItem.innerHTML = `
-                    <div>
-                        <div class="chat-title">${titleDisplay}</div>
-                        <div class="chat-date">${project.date}</div>
+        // Function to display chat history
+        function displayChatHistory() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+            
+            chatHistory.forEach(message => {
+                const messageElement = document.createElement('div');
+                messageElement.className = `message ${message.sender}`;
+                messageElement.innerHTML = `
+                    <div class="message-content">
+                        <p>${message.text}</p>
+                        <span class="timestamp">${message.timestamp}</span>
                     </div>
-                    <button class="delete-btn" title="Delete project">
-                        <span class="trash-icon">🗑️</span>
-                    </button>
                 `;
-                chatList.appendChild(chatItem);
+                chatMessages.appendChild(messageElement);
             });
+            
+            // Scroll to bottom of chat
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
+
+        // Function to save chat history
+        function saveChatHistory() {
+            const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
+            const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
+            
+            // Find and update the current project's chat history
+            const projectIndex = projects.findIndex(p => p.title === currentChat.title);
+            if (projectIndex !== -1) {
+                projects[projectIndex].chatHistory = chatHistory;
+                localStorage.setItem('projectList', JSON.stringify(projects));
+                
+                // Update current chat
+                currentChat.chatHistory = chatHistory;
+                localStorage.setItem('currentChat', JSON.stringify(currentChat));
+            }
+        }
+
+        // Handle new messages
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const message = messageInput.value.trim();
+                if (message) {
+                    // Add message to history
+                    chatHistory.push({
+                        text: message,
+                        sender: 'user',
+                        timestamp: new Date().toLocaleTimeString()
+                    });
+                    
+                    // Clear input and update display
+                    messageInput.value = '';
+                    displayChatHistory();
+                    saveChatHistory();
+                    
+                    // Simulate AI response (you can replace this with actual AI integration)
+                    setTimeout(() => {
+                        chatHistory.push({
+                            text: 'This is a sample response.',
+                            sender: 'ai',
+                            timestamp: new Date().toLocaleTimeString()
+                        });
+                        displayChatHistory();
+                        saveChatHistory();
+                    }, 1000);
+                }
+            }
+        });
 
         // Update click handler for project list items
         document.getElementById('chatList').addEventListener('click', function(e) {
@@ -350,8 +401,6 @@
                     chatItem.remove();
                 }
             } else {
-                const title = chatItem.querySelector('.chat-title').textContent;
-                const date = chatItem.querySelector('.chat-date').textContent;
                 const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
                 const index = Array.from(chatList.children).indexOf(chatItem);
                 const project = projects[index];
@@ -360,23 +409,45 @@
                     title: project.title,
                     date: project.date,
                     fileCount: project.fileCount,
-                    files: project.files
+                    files: project.files,
+                    chatHistory: project.chatHistory || []
                 }));
                 
-                window.location.href = 'chat-view.html';
+                // Reload the page to show the selected chat
+                window.location.reload();
             }
         });
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadProjectList();
-            
-            // Load current chat
-            const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
-            if (currentChat.title) {
-                document.getElementById('documentTitle').textContent = currentChat.title;
-            }
-        });
+        // Function to load project list (same as index.html)
+        function loadProjectList() {
+            const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
+            const chatList = document.getElementById('chatList');
+            chatList.innerHTML = '';
+
+            projects.forEach(project => {
+                const chatItem = document.createElement('div');
+                chatItem.className = 'chat-item';
+                
+                // Remove the file count if it's already in the title
+                let titleDisplay = project.title;
+                if (!titleDisplay.includes('files)')) {
+                    titleDisplay = project.fileCount > 1 
+                        ? `${project.title} (${project.fileCount} files)` 
+                        : project.title;
+                }
+                
+                chatItem.innerHTML = `
+                    <div>
+                        <div class="chat-title">${titleDisplay}</div>
+                        <div class="chat-date">${project.date}</div>
+                    </div>
+                    <button class="delete-btn" title="Delete project">
+                        <span class="trash-icon">🗑️</span>
+                    </button>
+                `;
+                chatList.appendChild(chatItem);
+            });
+        }
     </script>
 </body>
 </html> 
