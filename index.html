@@ -199,10 +199,9 @@
             font-size: 16px;
         }
 
-        /* Add new auth buttons styles */
-        /* Add new auth buttons styles */
+        /* Auth button styles */
         .auth-buttons {
-            position: fixed;
+            position: absolute;
             top: 20px;
             right: 20px;
             z-index: 1000;
@@ -296,12 +295,14 @@
 
         .preview-container {
             max-width: 1200px;
-            width: calc(100% - 290px); /* Account for sidebar width + padding */
-            margin: 20px 20px 20px 270px; /* Align with main content */
+            width: calc(100% - 290px);
+            /* Account for sidebar width + padding */
+            margin: 20px 20px 20px 270px;
+            /* Align with main content */
             padding: 20px;
             background: white;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .preview-header {
@@ -328,7 +329,7 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             color: white;
             border: none;
             padding: 15px;
@@ -336,8 +337,13 @@
             z-index: 2;
         }
 
-        .carousel-button.prev { left: 10px; }
-        .carousel-button.next { right: 10px; }
+        .carousel-button.prev {
+            left: 10px;
+        }
+
+        .carousel-button.next {
+            right: 10px;
+        }
 
         .preview-content {
             width: 100%;
@@ -430,14 +436,14 @@
                         Choose Documents
                         <input type="file" id="fileUpload" accept="image/*,.pdf,.doc,.docx" multiple hidden>
                     </label>
-                    
+
                     <div id="fileList" class="file-list"></div>
-                    
+
                     <!-- Preview button -->
                     <button id="previewBtn" class="preview-button" style="display: none;">
                         Preview Documents
                     </button>
-                    
+
                     <button id="processBtn" class="process-button" style="display: none;">
                         Analyze Documents
                     </button>
@@ -469,7 +475,7 @@
         let selectedFiles = [];
         let currentPreviewIndex = 0;
 
-        fileUpload.addEventListener('change', function(e) {
+        fileUpload.addEventListener('change', function (e) {
             const newFiles = Array.from(e.target.files);
             selectedFiles = selectedFiles.concat(newFiles);
             updateFileList();
@@ -478,7 +484,7 @@
 
         function updateFileList() {
             fileList.innerHTML = '';
-            
+
             selectedFiles.forEach((file, index) => {
                 const fileItem = document.createElement('div');
                 fileItem.className = 'file-item';
@@ -494,7 +500,7 @@
             processBtn.style.display = hasFiles ? 'block' : 'none';
         }
 
-        fileList.addEventListener('click', function(e) {
+        fileList.addEventListener('click', function (e) {
             if (e.target.classList.contains('remove-btn')) {
                 const index = parseInt(e.target.dataset.index);
                 selectedFiles.splice(index, 1);
@@ -505,28 +511,28 @@
             }
         });
 
-        previewBtn.addEventListener('click', function() {
+        previewBtn.addEventListener('click', function () {
             if (selectedFiles.length > 0) {
                 showPreview(0);
                 previewContainer.style.display = 'block';
-                previewContainer.scrollIntoView({ 
+                previewContainer.scrollIntoView({
                     behavior: 'smooth',
                     block: 'start'
                 });
             }
         });
 
-        document.getElementById('closePreview').addEventListener('click', function() {
+        document.getElementById('closePreview').addEventListener('click', function () {
             previewContainer.style.display = 'none';
         });
 
-        document.getElementById('prevBtn').addEventListener('click', function() {
+        document.getElementById('prevBtn').addEventListener('click', function () {
             if (currentPreviewIndex > 0) {
                 showPreview(currentPreviewIndex - 1);
             }
         });
 
-        document.getElementById('nextBtn').addEventListener('click', function() {
+        document.getElementById('nextBtn').addEventListener('click', function () {
             if (currentPreviewIndex < selectedFiles.length - 1) {
                 showPreview(currentPreviewIndex + 1);
             }
@@ -536,13 +542,13 @@
             currentPreviewIndex = index;
             const file = selectedFiles[index];
             document.getElementById('previewTitle').textContent = `Preview: ${file.name} (${index + 1}/${selectedFiles.length})`;
-            
+
             const previewContent = document.getElementById('previewContent');
             previewContent.innerHTML = '';
 
             if (file.type.startsWith('image/')) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     const img = document.createElement('img');
                     img.src = e.target.result;
                     img.style.maxWidth = '100%';
@@ -566,7 +572,7 @@
         function updateCarouselDots() {
             const dotsContainer = document.getElementById('carouselDots');
             dotsContainer.innerHTML = '';
-            
+
             selectedFiles.forEach((_, index) => {
                 const dot = document.createElement('div');
                 dot.className = `dot${index === currentPreviewIndex ? ' active' : ''}`;
@@ -580,16 +586,16 @@
             document.getElementById('nextBtn').style.display = currentPreviewIndex < selectedFiles.length - 1 ? 'block' : 'none';
         }
 
-        processBtn.addEventListener('click', function() {
+        processBtn.addEventListener('click', function () {
             if (selectedFiles.length > 0) {
                 // Get existing projects or initialize empty array
                 const existingProjects = JSON.parse(localStorage.getItem('projectList') || '[]');
-                
+
                 // Create project name based on number of files
-                const projectName = selectedFiles.length === 1 
-                    ? selectedFiles[0].name 
+                const projectName = selectedFiles.length === 1
+                    ? selectedFiles[0].name
                     : `Document Set (${selectedFiles.length} files)`;
-                
+
                 // Add single project entry for all files
                 existingProjects.unshift({
                     title: projectName,
@@ -597,10 +603,10 @@
                     fileCount: selectedFiles.length,
                     files: selectedFiles.map(f => f.name)
                 });
-                
+
                 // Save updated project list
                 localStorage.setItem('projectList', JSON.stringify(existingProjects));
-                
+
                 // Set current chat for chat view
                 localStorage.setItem('currentChat', JSON.stringify({
                     title: projectName,
@@ -609,7 +615,7 @@
                     fileCount: selectedFiles.length,
                     files: selectedFiles.map(f => f.name)
                 }));
-                
+
                 // Navigate to chat view
                 window.location.href = 'chat-view.html';
             }
