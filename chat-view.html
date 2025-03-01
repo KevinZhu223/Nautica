@@ -316,10 +316,13 @@
                 const chatItem = document.createElement('div');
                 chatItem.className = 'chat-item';
                 
-                // Create the project title display
-                const titleDisplay = project.fileCount > 1 
-                    ? `${project.title} (${project.fileCount} files)` 
-                    : project.title;
+                // Remove the file count if it's already in the title
+                let titleDisplay = project.title;
+                if (!titleDisplay.includes('files)')) {
+                    titleDisplay = project.fileCount > 1 
+                        ? `${project.title} (${project.fileCount} files)` 
+                        : project.title;
+                }
                 
                 chatItem.innerHTML = `
                     <div>
