@@ -5,7 +5,7 @@ from typing import List
 
 from app.core import get_current_active_user, get_db
 from app.db import crud, models
-from app.schemas.project import ProjectCreate, ProjectResponse, MessageCreate, MessageResponse
+from app.schemas.project import ProjectCreate, ProjectResponse, MessageCreate, MessageResponse, ProjectUpdate
 from app.utils.gcs import upload_file_to_gcs
 
 router = APIRouter()

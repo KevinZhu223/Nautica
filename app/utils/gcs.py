@@ -7,7 +7,8 @@ settings = Settings()
 
 def upload_file_to_gcs(file: UploadFile) -> str:
     client = storage.Client()
-    bucket = client.bucket(settings.GCS_BUCKET_NAME)
+    print(settings.BUCKET_NAME)
+    bucket = client.bucket(settings.BUCKET_NAME)
     file_name = f"document_{int(time.time())}_{file.filename}"
     blob = bucket.blob(file_name)
     blob.upload_from_file(file.file)
