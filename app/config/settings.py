@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     REGION_NAME: str
     BUCKET_NAME: str
+    GOOGLE_APPLICATION_CREDENTIALS: str
 
     class Config:
         env_file = ".env"
@@ -15,3 +16,5 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+os.environ.setdefault("GOOGLE_APPLICATION_CREDENTIALS", settings.GOOGLE_APPLICATION_CREDENTIALS)
+

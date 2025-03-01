@@ -6,7 +6,7 @@ from google.cloud import storage
 settings = Settings()
 
 def upload_file_to_gcs(file: UploadFile) -> str:
-    client = storage.Client()  # Ensure your GCP credentials are configured in your environment
+    client = storage.Client()
     bucket = client.bucket(settings.GCS_BUCKET_NAME)
     file_name = f"document_{int(time.time())}_{file.filename}"
     blob = bucket.blob(file_name)
