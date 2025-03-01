@@ -589,7 +589,6 @@
         processBtn.addEventListener('click', function () {
             if (selectedFiles.length > 0) {
                 const existingProjects = JSON.parse(localStorage.getItem('projectList') || '[]');
-<<<<<<< HEAD
 
                 // Create project name based on number of files
                 const projectName = selectedFiles.length === 1
@@ -597,54 +596,17 @@
                     : `Document Set (${selectedFiles.length} files)`;
 
                 // Add single project entry for all files
-=======
-                
-                // Create a more descriptive project name for multiple files
-                let projectName;
-                if (selectedFiles.length === 1) {
-                    projectName = selectedFiles[0].name;
-                } else {
-                    // Get file types present in the set
-                    const fileTypes = [...new Set(selectedFiles.map(file => {
-                        const ext = file.name.split('.').pop().toLowerCase();
-                        switch(ext) {
-                            case 'pdf': return 'PDF';
-                            case 'doc':
-                            case 'docx': return 'Word';
-                            case 'jpg':
-                            case 'jpeg':
-                            case 'png': return 'Image';
-                            default: return 'Document';
-                        }
-                    }))];
-
-                    // Create descriptive name using first file and types
-                    const firstFileName = selectedFiles[0].name.split('.')[0];
-                    const typeDescription = fileTypes.join('/');
-                    const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    
-                    projectName = `${firstFileName} + ${selectedFiles.length - 1} ${typeDescription} files (${timestamp})`;
-                }
-                
-                // Add project entry
->>>>>>> 3941c123e6329ad632f8427d1f6750de13d0877e
                 existingProjects.unshift({
                     title: projectName,
                     date: new Date().toLocaleDateString(),
                     fileCount: selectedFiles.length,
                     files: selectedFiles.map(f => f.name)
                 });
-<<<<<<< HEAD
 
                 // Save updated project list
                 localStorage.setItem('projectList', JSON.stringify(existingProjects));
 
                 // Set current chat for chat view
-=======
-                
-                localStorage.setItem('projectList', JSON.stringify(existingProjects));
-                
->>>>>>> 3941c123e6329ad632f8427d1f6750de13d0877e
                 localStorage.setItem('currentChat', JSON.stringify({
                     title: projectName,
                     date: new Date().toLocaleDateString(),
@@ -652,12 +614,8 @@
                     fileCount: selectedFiles.length,
                     files: selectedFiles.map(f => f.name)
                 }));
-<<<<<<< HEAD
 
                 // Navigate to chat view
-=======
-                
->>>>>>> 3941c123e6329ad632f8427d1f6750de13d0877e
                 window.location.href = 'chat-view.html';
             }
         });
