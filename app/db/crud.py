@@ -156,6 +156,48 @@ def update_user_password(db: Session, user_id: int, new_password: str):
 
 
 
+#project operations
+def create_project(db: Session, user: models.User, pictures: List[str] = None, explanation: dict = None):
+    if pictures is None:
+        pictures = []
+    if explanation is None:
+        explanation = {}
+    new_project = models.Project(user_id=user.id, pictures=pictures, explanation=explanation)
+    db.add(new_project)
+    db.commit()
+    db.refresh(new_project)
+    return new_project
+
+def get_projects_by_user(db: Session, user: models.User):
+    return db.query(models.Project).filter(models.Project.user_id == user.id).all()
+
+def get_project_by_id(db: Session, project_id: int):
+    return db.query(models.Project).filter(models.Project.id == project_id).first()
+
+def update_project(db: Session, project: models.Project, pictures: List[str] = None, explanation: dict = None):
+    if pictures is not None:
+        project.pictures = pictures
+    if explanation is not None:
+        project.explanation = explanation
+    db.commit()
+    db.refresh(project)
+    return project
+
+def delete_project(db: Session, project: models.Project):
+    db.delete(project)
+    db.commit()
+    return project
+
+def add_message_to_project(db: Session, project: models.Project, message_text: str, role: str):
+    new_message = models.Message(project_id=project.id, message=message_text, role=role)
+    db.add(new_message)
+    db.commit()
+    db.refresh(new_message)
+    return new_message
+
+def get_messages_for_project(db: Session, project: models.Project):
+    return db.query(models.Message).filter(models.Message.project_id == project.id).all()
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
