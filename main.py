@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.responses import FileResponse
-from app.api import users, files
+from app.api import users, projects
 from app.db import models
 from app.db.database import engine
 from fastapi.staticfiles import StaticFiles
@@ -29,7 +29,7 @@ app.add_middleware(
 
 # Include API routers
 app.include_router(users.router, prefix="/users", tags=["users"])
-app.include_router(files.router, prefix="/api/files", tags=["files"])
+app.include_router(projects.router, prefix="/projects", tags=["projects"])
 
 # Create tables in the database
 models.Base.metadata.create_all(bind=engine)
@@ -52,9 +52,6 @@ app.openapi = openapi_route
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Root endpoint
-@app.get("/")
-async def root():
-    return {"message": "Welcome to the Document Translation API"}
 
 # Health check endpoint
 @app.get("/health")
