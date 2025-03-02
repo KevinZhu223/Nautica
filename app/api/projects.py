@@ -63,22 +63,36 @@ def delete_project(
     deleted_project = crud.delete_project(db, project)
     return deleted_project
 
-@router.post("/{project_id}/upload_picture", response_model=ProjectResponse)
-def upload_picture(
+@router.post("/{project_id}/upload_pictures", response_model=ProjectResponse)
+def upload_pictures(
     project_id: int,
-    file: UploadFile = File(...),
+    files: List[UploadFile] = File(...),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user)
 ):
+    # Retrieve the project and verify user ownership
     project = crud.get_project_by_id(db, project_id)
     if not project or project.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Project not found")
-    picture_url = upload_file_to_gcs(file)
-    # Append the new picture URL to the existing list
-    pictures = project.pictures or []
-    pictures.append(picture_url)
-    updated_project = crud.update_project(db, project, pictures=pictures)
-    return updated_project
+
+    # Initialize list to hold new picture URLs
+    new_picture_urls = []
+    for file in files:
+        picture_url = upload_file_to_gcs(file)  # Upload each file and get its URL
+        new_picture_urls.append(picture_url)
+    
+    # Append the new URLs to the project's existing pictures list (or initialize if None)
+    if project.pictures is None:
+        project.pictures = new_picture_urls
+    else:
+        project.pictures = project.pictures + new_picture_urls
+
+    print(project.pictures)
+
+    db.commit()
+    db.refresh(project)
+    return project
+
 
 @router.post("/{project_id}/messages", response_model=MessageResponse)
 def add_message(

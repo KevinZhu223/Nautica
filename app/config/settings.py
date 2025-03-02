@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     BUCKET_NAME: str
     GOOGLE_APPLICATION_CREDENTIALS: str
+    GEMINI_API_KEY: str
 
     class Config:
         env_file = ".env"
