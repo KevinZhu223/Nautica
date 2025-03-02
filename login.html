@@ -234,18 +234,18 @@
     <script>
         // API endpoints
         const API_ENDPOINTS = {
-        login: 'http://rnadj-128-180-243-28.a.free.pinggy.link/api/users/login',
-        signup: 'http://rnadj-128-180-243-28.a.free.pinggy.link/api/users/register'
-    };
+            login: 'http://localhost:3000/api/users/login',
+            signup: 'http://localhost:3000/api/users/register'
+        };
 
         // Token management functions
         function saveToken(token) {
-        localStorage.setItem('userToken', token);
-    }
+            localStorage.setItem('userToken', token);
+        }
 
-    function saveUserData(userData) {
-        localStorage.setItem('userData', JSON.stringify(userData));
-    }
+        function saveUserData(userData) {
+            localStorage.setItem('userData', JSON.stringify(userData));
+        }
 
         function removeToken() {
             localStorage.removeItem('userToken');
@@ -291,7 +291,7 @@
             successMessage.style.display = 'none';
             loadingIndicator.style.display = 'block';
 
-            const username = document.getElementById('loginUsername').value;
+            const email = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
 
             try {
@@ -300,20 +300,21 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ email, password })
                 });
 
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.message || 'Login failed. Please try again.');
+                    throw new Error(data.detail || 'Login failed. Please try again.');
                 }
 
-                saveToken(data.token);
+                localStorage.setItem('token', data.access_token);
+                localStorage.setItem('token_type', data.token_type);
+                
                 successMessage.textContent = 'Login successful! Redirecting...';
                 successMessage.style.display = 'block';
                 
-                // Redirect after successful login
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 1500);

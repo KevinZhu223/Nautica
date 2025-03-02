@@ -547,6 +547,46 @@
     </div>
 
     <script>
+        const API_ENDPOINTS = {
+            projects: 'http://localhost:3000/api/projects/',
+            upload: 'http://localhost:3000/api/projects/{project_id}/upload_pictures',
+            messages: 'http://localhost:3000/api/projects/{project_id}/messages'
+        };
+
+        function getAuthHeaders() {
+            const token = localStorage.getItem('token');
+            const tokenType = localStorage.getItem('token_type') || 'Bearer';
+            return {
+                'Authorization': `${tokenType} ${token}`,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        async function loadUserProjects() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                const response = await fetch(API_ENDPOINTS.projects, {
+                    headers: getAuthHeaders()
+                });
+                
+                if (response.ok) {
+                    const projects = await response.json();
+                    updateProjectList(projects);
+                } else {
+                    // Handle unauthorized access
+                    if (response.status === 401) {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('token_type');
+                        window.location.reload();
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load projects:', error);
+            }
+        }
+
         const fileUpload = document.getElementById('fileUpload');
         const fileList = document.getElementById('fileList');
         const previewBtn = document.getElementById('previewBtn');
@@ -682,63 +722,63 @@
             document.getElementById('nextBtn').style.display = currentPreviewIndex < selectedFiles.length - 1 ? 'block' : 'none';
         }
 
-        processBtn.addEventListener('click', function() {
-            if (!isLoggedIn()) {
-                window.location.href = 'login.html';
-                return;
-            }
-
+        processBtn.addEventListener('click', async function() {
             if (selectedFiles.length > 0) {
-                this.classList.add('processing');
-                this.textContent = 'Processing...';
-                const existingProjects = JSON.parse(localStorage.getItem('projectList') || '[]');
-                
-                // Create a more descriptive project name for multiple files
-                let projectName;
-                if (selectedFiles.length === 1) {
-                    projectName = selectedFiles[0].name;
-                } else {
-                    // Get file types present in the set
-                    const fileTypes = [...new Set(selectedFiles.map(file => {
-                        const ext = file.name.split('.').pop().toLowerCase();
-                        switch(ext) {
-                            case 'pdf': return 'PDF';
-                            case 'doc':
-                            case 'docx': return 'Word';
-                            case 'jpg':
-                            case 'jpeg':
-                            case 'png': return 'Image';
-                            default: return 'Document';
-                        }
-                    }))];
-
-                    // Create descriptive name using first file and types
-                    const firstFileName = selectedFiles[0].name.split('.')[0];
-                    const typeDescription = fileTypes.join('/');
-                    const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    
-                    projectName = `${firstFileName} + ${selectedFiles.length - 1} ${typeDescription} files (${timestamp})`;
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('Please login to process documents');
+                    window.location.href = 'login.html';
+                    return;
                 }
-                
-                // Add project entry
-                existingProjects.unshift({
-                    title: projectName,
-                    date: new Date().toLocaleDateString(),
-                    fileCount: selectedFiles.length,
-                    files: selectedFiles.map(f => f.name)
-                });
-                
-                localStorage.setItem('projectList', JSON.stringify(existingProjects));
-                
-                localStorage.setItem('currentChat', JSON.stringify({
-                    title: projectName,
-                    date: new Date().toLocaleDateString(),
-                    isNewUpload: true,
-                    fileCount: selectedFiles.length,
-                    files: selectedFiles.map(f => f.name)
-                }));
-                
-                window.location.href = 'chat-view.html';
+
+                try {
+                    // First create a new project
+                    const projectResponse = await fetch(API_ENDPOINTS.projects, {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({ explanation: {} })
+                    });
+
+                    if (!projectResponse.ok) {
+                        throw new Error('Failed to create project');
+                    }
+
+                    const project = await projectResponse.json();
+
+                    // Then upload files to the project
+                    const formData = new FormData();
+                    selectedFiles.forEach(file => {
+                        formData.append('files', file);
+                    });
+
+                    const uploadUrl = API_ENDPOINTS.upload.replace('{project_id}', project.id);
+                    const uploadResponse = await fetch(uploadUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': getAuthHeaders().Authorization
+                        },
+                        body: formData
+                    });
+
+                    if (!uploadResponse.ok) {
+                        throw new Error('Failed to upload files');
+                    }
+
+                    const result = await uploadResponse.json();
+                    
+                    // Store project info and redirect
+                    localStorage.setItem('currentChat', JSON.stringify({
+                        title: `Project ${project.id}`,
+                        date: new Date(project.created_at).toLocaleDateString(),
+                        projectId: project.id,
+                        files: selectedFiles.map(f => f.name)
+                    }));
+                    
+                    window.location.href = 'chat-view.html';
+                } catch (error) {
+                    console.error('Error processing files:', error);
+                    alert('Failed to process files. Please try again.');
+                }
             }
         });
 
