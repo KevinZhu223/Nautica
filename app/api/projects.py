@@ -15,7 +15,7 @@ from app.db import crud, models
 from app.schemas.project import (MessageCreate, MessageResponse, ProjectCreate,
                                  ProjectResponse, ProjectUpdate)
 from app.utils.gcs import upload_file_to_gcs
-from app.utils.genai_helper import explain
+from app.utils.genai_helper import explain, chat
 
 router = APIRouter()
 
@@ -147,7 +147,10 @@ def add_message(
     project = crud.get_project_by_id(db, project_id)
     if not project or project.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Project not found")
-    new_message = crud.add_message_to_project(db, project, message_text=message_data.message, role=message_data.role)
+    new_message = crud.add_message_to_project(db, project, message_text=message_data.message, role="user")
+    messages = crud.get_messages_for_project(db, project)
+    assistant = chat(project, messages)
+    new_message = crud.add_message_to_project(db, project, message_text=assistant, role="assistant")
     return new_message
 
 @router.get("/{project_id}/messages", response_model=List[MessageResponse])

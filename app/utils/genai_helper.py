@@ -72,3 +72,63 @@ def explain(project):
     
     output = response.choices[0].message.content.strip()
     return {"text": output}
+
+def chat(project, messages):
+    client = OpenAI()
+    client.api_key = settings.OPENAI_API_KEY
+
+    context = []
+    
+    for image_url in project.pictures:
+        try:
+            response = requests.get(image_url)
+            response.raise_for_status()
+            image_data = response.content
+            base64_data = base64.b64encode(image_data).decode('utf-8')
+            data_url = f"data:image/png;base64,{base64_data}"
+            context.append({
+                "type": "image_url",
+                "image_url": {"url": data_url}
+            })
+        except Exception as e:
+            print(f"Failed to process image {image_url}: {e}")
+            continue
+
+
+    first = [
+        {
+            "role": "user",
+            "content": context  # assuming context is defined elsewhere
+        },
+        {
+            "role": "assistant",
+            "content": {
+                "type": "text",
+                "text": project.explanation["text"]  # assuming project.explanation is defined
+            }
+        }
+    ]
+
+    # The messages structure is converted into a history dict:
+    messages_item = next(item for item in messages)  # assuming messages is an iterable of message objects
+    history = {
+        "role": messages_item.role,
+        "content": [
+            {
+                "type": "text",
+                "text": messages_item.message
+            }
+        ]
+    }
+
+    messages = first + [history]
+    print(messages)
+
+    response = client.chat.completions.create(
+        model="o1",
+        messages=messages,
+        response_format={"type": "text"}
+    )
+    
+    output = response.choices[0].message.content.strip()
+    return output

@@ -24,7 +24,6 @@ class ProjectResponse(ProjectBase):
 
 class MessageBase(BaseModel):
     message: str
-    role: str
 
 class MessageCreate(MessageBase):
     pass
