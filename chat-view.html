@@ -237,12 +237,11 @@
             margin-top: 5px;
         }
 
-        /* Add these styles to chat-view.html */
+        /* Update document carousel and container styles */
         .document-carousel {
             width: 100%;
             height: 400px;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             overflow: hidden;
@@ -251,7 +250,10 @@
         .carousel-container {
             position: relative;
             width: 100%;
-            height: 100%;
+            height: 100%; /* Now takes full height since no dots */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .preview-content {
@@ -260,18 +262,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-        }
-
-        .preview-content img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .preview-content iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+            padding: 10px;
         }
 
         .carousel-button {
@@ -281,7 +272,7 @@
             background: rgba(0, 0, 0, 0.5);
             color: white;
             border: none;
-            padding: 10px;
+            padding: 15px;
             cursor: pointer;
             z-index: 2;
             border-radius: 4px;
@@ -290,69 +281,18 @@
         .carousel-button.prev { left: 10px; }
         .carousel-button.next { right: 10px; }
 
-        .carousel-dots {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 10px;
+        /* Style scrollbar */
+        .carousel-dots::-webkit-scrollbar {
+            height: 3px;
         }
 
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ddd;
-            cursor: pointer;
+        .carousel-dots::-webkit-scrollbar-track {
+            background: #f1f1f1;
         }
 
-        .dot.active {
-            background: #2196F3;
-        }
-
-        .preview-container {
-            position: relative;
-            max-width: 100%;
-            margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .preview-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .preview-header h3 {
-            margin: 0;
-            font-size: 16px;
-            color: #333;
-        }
-
-        .preview-content {
-            width: 100%;
-            min-height: 400px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #f8f9fa;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .preview-content iframe {
-            width: 100%;
-            height: 400px;
-            border: none;
-        }
-
-        .preview-content img {
-            max-width: 100%;
-            max-height: 400px;
-            object-fit: contain;
+        .carousel-dots::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 2px;
         }
 
         /* Tabs styles */
@@ -410,85 +350,6 @@
             overflow-y: auto;
         }
 
-        /* Carousel styles */
-        .preview-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background: white;
-        }
-
-        .carousel-container {
-            position: relative;
-            width: 100%;
-            height: calc(100% - 30px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .preview-content {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-        }
-
-        .carousel-button {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            padding: 15px;
-            cursor: pointer;
-            z-index: 2;
-            border-radius: 4px;
-            font-size: 18px;
-        }
-
-        .carousel-button.prev { left: 10px; }
-        .carousel-button.next { right: 10px; }
-
-        .carousel-dots {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            padding: 10px 0;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ddd;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .dot.active {
-            background: #2196F3;
-        }
-
-        .preview-content img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .preview-content iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
         /* Add styles for the title container */
         .title-container {
             display: flex;
@@ -507,6 +368,96 @@
             font-size: 1.2rem;
             margin: 0;
             font-weight: normal;
+        }
+
+        /* Add styles for fullscreen view */
+        .fullscreen-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .fullscreen-content {
+            position: relative;
+            width: 90%;
+            height: 90%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .fullscreen-content img,
+        .fullscreen-content iframe {
+            max-width: 90%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .fullscreen-nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 20px;
+            cursor: pointer;
+            font-size: 24px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            z-index: 1001;
+        }
+
+        .fullscreen-nav-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .fullscreen-nav-button.prev { left: 20px; }
+        .fullscreen-nav-button.next { right: 20px; }
+
+        .close-fullscreen {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1002;
+        }
+
+        .zoom-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px;
+            cursor: pointer;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .zoom-button:hover {
+            background: rgba(0, 0, 0, 0.7);
         }
     </style>
 </head>
@@ -546,7 +497,6 @@
                                     <div id="previewContent" class="preview-content"></div>
                                     <button class="carousel-button next" id="nextBtn">❯</button>
                                 </div>
-                                <div id="carouselDots" class="carousel-dots"></div>
                             </div>
                         </div>
                     </div>
@@ -726,6 +676,13 @@
             const previewContent = document.getElementById('previewContent');
             previewContent.innerHTML = '';
 
+            // Add zoom button
+            const zoomButton = document.createElement('button');
+            zoomButton.className = 'zoom-button';
+            zoomButton.innerHTML = '🔍 Zoom';
+            zoomButton.onclick = () => openFullscreen(fileUrl);
+            previewContent.appendChild(zoomButton);
+
             if (fileUrl.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/)) {
                 const img = document.createElement('img');
                 img.src = fileUrl;
@@ -741,20 +698,7 @@
                 previewContent.appendChild(iframe);
             }
 
-            updateCarouselDots();
             updateNavigationButtons();
-        }
-
-        function updateCarouselDots() {
-            const dotsContainer = document.getElementById('carouselDots');
-            dotsContainer.innerHTML = '';
-            
-            projectFiles.forEach((_, index) => {
-                const dot = document.createElement('div');
-                dot.className = `dot${index === currentPreviewIndex ? ' active' : ''}`;
-                dot.addEventListener('click', () => showPreview(index));
-                dotsContainer.appendChild(dot);
-            });
         }
 
         function updateNavigationButtons() {
@@ -798,6 +742,89 @@
                 showPreview(currentPreviewIndex + 1);
             }
         });
+
+        // Add fullscreen overlay to the body
+        document.body.insertAdjacentHTML('beforeend', `
+            <div class="fullscreen-overlay" id="fullscreenOverlay">
+                <button class="fullscreen-nav-button prev" id="fullscreenPrevBtn">❮</button>
+                <div class="fullscreen-content" id="fullscreenContent"></div>
+                <button class="fullscreen-nav-button next" id="fullscreenNextBtn">❯</button>
+                <button class="close-fullscreen" onclick="closeFullscreen()">×</button>
+            </div>
+        `);
+
+        // Function to open fullscreen view
+        function openFullscreen(fileUrl) {
+            const overlay = document.getElementById('fullscreenOverlay');
+            const content = document.getElementById('fullscreenContent');
+            const prevBtn = document.getElementById('fullscreenPrevBtn');
+            const nextBtn = document.getElementById('fullscreenNextBtn');
+            
+            content.innerHTML = '';
+            
+            if (fileUrl.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/)) {
+                const img = document.createElement('img');
+                img.src = fileUrl;
+                content.appendChild(img);
+            } else if (fileUrl.toLowerCase().endsWith('.pdf')) {
+                const iframe = document.createElement('iframe');
+                iframe.src = fileUrl;
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                content.appendChild(iframe);
+            }
+            
+            overlay.style.display = 'flex';
+            
+            // Update navigation buttons visibility
+            prevBtn.style.display = currentPreviewIndex > 0 ? 'block' : 'none';
+            nextBtn.style.display = currentPreviewIndex < projectFiles.length - 1 ? 'block' : 'none';
+            
+            // Add navigation button handlers
+            prevBtn.onclick = () => {
+                if (currentPreviewIndex > 0) {
+                    currentPreviewIndex--;
+                    openFullscreen(projectFiles[currentPreviewIndex]);
+                }
+            };
+            
+            nextBtn.onclick = () => {
+                if (currentPreviewIndex < projectFiles.length - 1) {
+                    currentPreviewIndex++;
+                    openFullscreen(projectFiles[currentPreviewIndex]);
+                }
+            };
+            
+            // Add keyboard navigation
+            const handleKeydown = (e) => {
+                if (e.key === 'Escape') {
+                    closeFullscreen();
+                } else if (e.key === 'ArrowLeft' && currentPreviewIndex > 0) {
+                    prevBtn.click();
+                } else if (e.key === 'ArrowRight' && currentPreviewIndex < projectFiles.length - 1) {
+                    nextBtn.click();
+                }
+            };
+            
+            document.addEventListener('keydown', handleKeydown);
+            
+            // Close on clicking outside
+            overlay.onclick = (e) => {
+                if (e.target === overlay) {
+                    closeFullscreen();
+                }
+            };
+
+            // Store the event listener for cleanup
+            overlay.handleKeydown = handleKeydown;
+        }
+
+        // Function to close fullscreen view
+        function closeFullscreen() {
+            const overlay = document.getElementById('fullscreenOverlay');
+            document.removeEventListener('keydown', overlay.handleKeydown);
+            overlay.style.display = 'none';
+        }
     </script>
 </body>
 </html> 
