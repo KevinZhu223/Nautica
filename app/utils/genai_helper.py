@@ -110,7 +110,8 @@ def chat(project, messages):
     ]
 
     # The messages structure is converted into a history dict:
-    messages_item = next(item for item in messages)  # assuming messages is an iterable of message objects
+    
+    messages_item = next(item for item in reversed(messages))  # assuming messages is an iterable of message objects
     history = {
         "role": messages_item.role,
         "content": [
@@ -120,6 +121,7 @@ def chat(project, messages):
             }
         ]
     }
+
 
     messages = first + [history]
     print(messages)

@@ -30,6 +30,7 @@ class MessageCreate(MessageBase):
 
 class MessageResponse(MessageBase):
     id: int
+    role: str
     project_id: int
     timestamp: datetime
 
