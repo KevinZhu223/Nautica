@@ -18,7 +18,7 @@
             display: flex;
             min-height: 100vh;
             position: relative;
-            padding-top: 20px;
+            padding-top: 70px;
         }
 
         /* Sidebar styles */
@@ -26,10 +26,10 @@
             width: 250px;
             background-color: #ffffff;
             border-right: 1px solid #dee2e6;
-            height: 100vh;
+            height: calc(100vh - 70px);
             position: fixed;
             left: 0;
-            top: 0;
+            top: 70px;
             overflow-y: auto;
             box-shadow: 2px 0 10px rgba(0,0,0,0.1);
         }
@@ -91,20 +91,12 @@
             flex-grow: 1;
             padding: 20px;
             position: relative;
+            margin-top: 20px;
         }
 
         /* Add new styles for images and title */
         .logo-container {
-            text-align: center;
-            margin-bottom: 20px;
-            width: 100%;
-        }
-
-        .logo-container img {
-            max-width: 350px;
-            height: auto;
-            margin: 10px auto;
-            display: block;
+            display: none;
         }
 
         .container {
@@ -224,11 +216,7 @@
 
         /* Auth button styles */
         .auth-buttons {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 1001;
-            width: auto;
+            position: static;
         }
 
         .auth-button {
@@ -469,12 +457,51 @@
         .not-logged-in .upload-button:hover + .login-required-tooltip {
             display: block;
         }
+
+        /* Add this style */
+        .sidebar.hidden {
+            display: none;
+        }
+
+        .main-content.full-width {
+            margin-left: 0;
+        }
+
+        /* Add these styles */
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 1000;
+        }
+
+        .nav-logo {
+            height: 40px;
+        }
+
+        .nav-logo img {
+            height: 100%;
+            width: auto;
+        }
     </style>
 </head>
 
 <body>
-    <div class="auth-buttons">
-        <a href="./login.html" class="auth-button">Login</a>
+    <div class="nav-bar">
+        <div class="nav-logo">
+            <img src="./images/full.svg" alt="Lexilytics Logo">
+        </div>
+        <div class="auth-buttons">
+            <a href="./login.html" class="auth-button">Login</a>
+        </div>
     </div>
 
     <div class="app-layout">
@@ -842,6 +869,8 @@
 
         // Function to load project list from localStorage
         function loadProjectList() {
+            if (!isLoggedIn()) return;
+            
             const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
             const chatList = document.getElementById('chatList');
             chatList.innerHTML = ''; // Clear existing items
@@ -860,14 +889,35 @@
             });
         }
 
-        // Load projects when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            const uploadSection = document.querySelector('.upload-section');
-            if (!isLoggedIn()) {
-                uploadSection.classList.add('not-logged-in');
+        // Add this function at the start of your JavaScript
+        function updateUIBasedOnLogin() {
+            const isUserLoggedIn = isLoggedIn();
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (!isUserLoggedIn) {
+                sidebar.classList.add('hidden');
+                mainContent.classList.add('full-width');
+            } else {
+                sidebar.classList.remove('hidden');
+                mainContent.classList.remove('full-width');
+                loadProjectList(); // Only load projects if logged in
             }
-            loadProjectList();
+        }
+
+        // Update your DOMContentLoaded event
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUIBasedOnLogin();
+            
+            // ... rest of your existing DOMContentLoaded code ...
         });
+
+        // Update your loadProjectList function to only run if logged in
+        function loadProjectList() {
+            if (!isLoggedIn()) return;
+            
+            // ... rest of your existing loadProjectList code ...
+        }
 
         // Add click handler for project list items
         document.getElementById('chatList').addEventListener('click', function(e) {
