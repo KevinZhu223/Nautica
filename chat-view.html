@@ -306,6 +306,52 @@
             height: 450px;
             overflow: hidden;
         }
+
+        .preview-container {
+            position: relative;
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .preview-header h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .preview-content {
+            width: 100%;
+            min-height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .preview-content iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
+        }
+
+        .preview-content img {
+            max-width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body>
@@ -334,12 +380,17 @@
                     <div class="box original-document">
                         <h3>Original Document</h3>
                         <div class="box-content" id="originalContent">
-                            <div class="carousel-container">
-                                <button class="carousel-button prev" id="docPrevBtn">❮</button>
-                                <div id="documentCarousel" class="document-carousel"></div>
-                                <button class="carousel-button next" id="docNextBtn">❯</button>
+                            <div id="previewContainer" class="preview-container">
+                                <div class="preview-header">
+                                    <h3 id="previewTitle">Document Preview</h3>
+                                </div>
+                                <div class="carousel-container">
+                                    <button class="carousel-button prev" id="prevBtn">❮</button>
+                                    <div id="previewContent" class="preview-content"></div>
+                                    <button class="carousel-button next" id="nextBtn">❯</button>
+                                </div>
+                                <div id="carouselDots" class="carousel-dots"></div>
                             </div>
-                            <div id="documentDots" class="carousel-dots"></div>
                         </div>
                     </div>
                     
@@ -355,13 +406,19 @@
     </div>
 
     <script>
-        // Add chat history functionality
-        let chatHistory = [];
-        const chatContainer = document.getElementById('chatContainer');
-        const messageInput = document.getElementById('messageInput');
+        const API_ENDPOINTS = {
+            projects: 'http://34.136.229.253:8080/projects/',
+            upload: 'http://34.136.229.253:8080/projects/{project_id}/upload_pictures',
+            messages: 'http://34.136.229.253:8080/projects/{project_id}/messages'
+        };
 
-        function isLoggedIn() {
-            return localStorage.getItem('token') !== null;
+        function getAuthHeaders() {
+            const token = localStorage.getItem('token');
+            const tokenType = localStorage.getItem('token_type') || 'Bearer';
+            return {
+                'Authorization': `${tokenType} ${token}`,
+                'Content-Type': 'application/json'
+            };
         }
 
         async function loadUserProjects() {
@@ -375,6 +432,7 @@
                 
                 if (response.ok) {
                     const projects = await response.json();
+                    // Transform API projects into our display format
                     const formattedProjects = projects.map(project => ({
                         title: `Project ${project.id}`,
                         date: new Date(project.created_at).toLocaleDateString(),
@@ -384,10 +442,13 @@
                         updated_at: project.updated_at
                     }));
                     
+                    // Store formatted projects
                     localStorage.setItem('projectList', JSON.stringify(formattedProjects));
-                    loadProjectList();
+                    updateProjectList(formattedProjects);
                 } else {
                     if (response.status === 401) {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('token_type');
                         window.location.href = 'login.html';
                     }
                 }
@@ -396,8 +457,7 @@
             }
         }
 
-        function loadProjectList() {
-            const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
+        function updateProjectList(projects) {
             const chatList = document.getElementById('chatList');
             const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
             
@@ -421,7 +481,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            if (isLoggedIn()) {
+            if (localStorage.getItem('token') !== null) {
                 document.querySelector('.sidebar').style.display = 'block';
                 loadUserProjects(); // Load projects from API
                 loadCurrentProject();
@@ -629,6 +689,83 @@
 
         document.getElementById('docNextBtn').addEventListener('click', () => {
             if (currentDocIndex < projectFiles.length - 1) showDocument(currentDocIndex + 1);
+        });
+
+        let currentPreviewIndex = 0;
+        let selectedFiles = [];
+
+        function showPreview(index) {
+            currentPreviewIndex = index;
+            const file = selectedFiles[index];
+            document.getElementById('previewTitle').textContent = 
+                `Preview: ${file.name} (${index + 1}/${selectedFiles.length})`;
+
+            const previewContent = document.getElementById('previewContent');
+            previewContent.innerHTML = '';
+
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '800px';
+                    previewContent.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            } else if (file.type === 'application/pdf') {
+                const objectUrl = URL.createObjectURL(file);
+                const iframe = document.createElement('iframe');
+                iframe.src = objectUrl;
+                previewContent.appendChild(iframe);
+            } else {
+                previewContent.innerHTML = '<p>Preview not available for this file type</p>';
+            }
+
+            updateCarouselDots();
+            updateNavigationButtons();
+        }
+
+        function updateCarouselDots() {
+            const dotsContainer = document.getElementById('carouselDots');
+            dotsContainer.innerHTML = '';
+
+            selectedFiles.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.className = `dot${index === currentPreviewIndex ? ' active' : ''}`;
+                dot.addEventListener('click', () => showPreview(index));
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        function updateNavigationButtons() {
+            document.getElementById('prevBtn').style.display = 
+                currentPreviewIndex > 0 ? 'block' : 'none';
+            document.getElementById('nextBtn').style.display = 
+                currentPreviewIndex < selectedFiles.length - 1 ? 'block' : 'none';
+        }
+
+        document.getElementById('prevBtn').addEventListener('click', function () {
+            if (currentPreviewIndex > 0) {
+                showPreview(currentPreviewIndex - 1);
+            }
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', function () {
+            if (currentPreviewIndex < selectedFiles.length - 1) {
+                showPreview(currentPreviewIndex + 1);
+            }
+        });
+
+        // Initialize preview when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
+            if (currentChat.files) {
+                selectedFiles = currentChat.files;
+                if (selectedFiles.length > 0) {
+                    showPreview(0);
+                }
+            }
         });
     </script>
 </body>
