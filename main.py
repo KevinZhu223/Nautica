@@ -21,13 +21,11 @@ app = FastAPI()
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://kevinzhu223.github.io"],
-    allow_origin_regex=r"^http://localhost(:\d+)?$",
+    allow_origins=["*"],  # Add your frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # Include API routers
 app.include_router(users.router, prefix="/users", tags=["users"])
