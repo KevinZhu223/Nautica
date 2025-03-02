@@ -10,7 +10,7 @@
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
             color: #2c3e50;
         }
 
@@ -24,7 +24,8 @@
         /* Sidebar styles */
         .sidebar {
             width: 250px;
-            background-color: #ffffff;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             border-right: 1px solid #dee2e6;
             height: calc(100vh - 70px);
             position: fixed;
@@ -103,20 +104,25 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 30px;
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             border-radius: 15px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             text-align: center;
+            animation: fadeIn 0.6s ease-out;
         }
 
         .container h1 {
             color: #2c3e50;
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-align: center;
             width: 100%;
             display: block;
+            background: linear-gradient(135deg, #1976D2, #2196F3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         /* Existing upload section styles */
@@ -124,11 +130,16 @@
             text-align: center;
             margin: 20px 0;
             position: relative;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin: 30px 0;
         }
 
         .upload-button {
             display: inline-block;
-            padding: 15px 30px;
+            padding: 15px 35px;
             background: linear-gradient(135deg, #2196F3, #1976D2);
             color: white;
             border: none;
@@ -137,6 +148,8 @@
             transition: all 0.3s ease;
             font-weight: 600;
             box-shadow: 0 4px 6px rgba(33,150,243,0.3);
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
         }
 
         .upload-button:hover {
@@ -239,21 +252,23 @@
         .process-button {
             display: block;
             width: 100%;
-            padding: 12px;
+            padding: 15px 30px;
             background: linear-gradient(135deg, #2196F3, #1976D2);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             margin-top: 20px;
             transition: all 0.3s ease;
             font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
             box-shadow: 0 4px 6px rgba(33,150,243,0.3);
         }
 
         .process-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(33,150,243,0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(33, 150, 243, 0.2);
         }
 
         .file-list {
@@ -264,11 +279,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 15px;
-            margin: 8px 0;
-            background: #f8f9fa;
+            padding: 15px 20px;
+            margin: 10px 0;
+            background: white;
             border: 1px solid #e0e0e0;
-            border-radius: 8px;
+            border-radius: 10px;
             transition: all 0.3s ease;
         }
 
@@ -276,6 +291,7 @@
             background: #fff;
             border-color: #2196F3;
             transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.1);
         }
 
         .remove-btn {
@@ -296,15 +312,17 @@
         .preview-button {
             display: block;
             width: 100%;
-            padding: 12px;
-            background: #e3f2fd;
-            color: #1976d2;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             margin: 20px 0;
             transition: all 0.3s ease;
             font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
         }
 
         .preview-button:hover {
@@ -491,6 +509,48 @@
             height: 100%;
             width: auto;
         }
+
+        /* Enhanced feature grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .feature-item {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.6s ease-out backwards;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(33, 150, 243, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+            color: #2196F3;
+        }
+
+        /* Add subtle animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feature-item:nth-child(1) { animation-delay: 0.1s; }
+        .feature-item:nth-child(2) { animation-delay: 0.2s; }
+        .feature-item:nth-child(3) { animation-delay: 0.3s; }
+        .feature-item:nth-child(4) { animation-delay: 0.4s; }
     </style>
 </head>
 
