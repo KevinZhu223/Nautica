@@ -1,0 +1,548 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    overflow: hidden; /* Prevent overall page scroll */
+}
+  
+/* Provide a top navigation bar that sits above everything */
+.nav-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 1000;
+}
+  
+.nav-logo {
+    height: 40px;
+}
+.nav-logo img {
+    height: 100%;
+    width: auto;
+}
+  
+.auth-button {
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+.auth-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(33,150,243,0.3);
+}
+  
+/* The overall app layout: sidebar + main content */
+.app-layout {
+    display: flex;
+    height: 100vh; /* Full viewport height */
+}
+  
+/*──────────────── Sidebar ────────────────*/
+.sidebar {
+    width: 250px;
+    background-color: #ffffff;
+    border-right: 1px solid #dee2e6;
+    height: 100%;
+    position: fixed;
+    left: 0;
+    overflow-y: auto;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+  
+.sidebar-header {
+    padding: 25px 20px;
+    border-bottom: 1px solid #dee2e6;
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+}
+.sidebar-header h2 {
+    margin: 0;
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+  
+.chat-list {
+    padding: 10px;
+}
+  
+.chat-item {
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    position: relative;
+    padding-right: 40px;
+}
+.chat-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-color: #2196F3;
+}
+.chat-item.active {
+    background-color: #e3f2fd;
+}
+.chat-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+.chat-date {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    margin-top: 5px;
+}
+
+.delete-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    padding: 5px;
+    border-radius: 4px;
+}
+.chat-item:hover .delete-btn {
+    opacity: 1;
+}
+.delete-btn:hover {
+    background-color: #ffebee;
+}
+  
+/*──────────────── Main Content & Container ────────────────*/
+.main-content {
+    margin-left: 250px;
+    height: 100%;
+    overflow: hidden;
+    padding: 20px 20px 10px 20px;
+    box-sizing: border-box;
+}
+.container {
+    width: 100%;
+    height: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+  
+/* Header Section with Back Button & Title */
+.header-section {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 30px;
+    padding: 20px 0;
+}
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 20px;
+}
+.back-button:hover {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+}
+.back-button::before {
+    content: "←";
+    margin-right: 8px;
+    font-size: 18px;
+}
+.title-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+.title-container h1 {
+    margin: 0;
+    font-size: 2rem;
+    color: #333;
+}
+.project-subtitle {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #666;
+    font-weight: normal;
+}
+  
+/*──────────────── Translation Boxes (Panels) ────────────────*/
+/* If no project is selected, you may apply the .no-project class to hide these */
+.translation-boxes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    height: calc(100% - 110px); /* Subtract header-section height + margins */
+    overflow: hidden;
+}
+.no-project .translation-boxes {
+    display: none;
+}
+
+/* A placeholder container to show when no project is selected */
+.no-project-selected {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(100% - 60px);
+    color: #999;
+    font-size: 1.5rem;
+    border: 2px dashed #ccc;
+    margin-top: 20px;
+    width: calc(100vw - 310px);
+}
+  
+/* Each box uses flex-column with a header and scrollable content area */
+.box {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow: hidden;
+    min-width: 0;
+    padding: 0;
+}
+.box > h3 {
+    margin: 0;
+    padding: 20px;
+    background: white;
+    border-bottom: 1px solid #dee2e6;
+    color: #333;
+    font-size: 1.2rem;
+    flex: 0 0 auto;
+}
+.box-content {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0 0 4px 4px;
+    padding: 15px;
+    box-sizing: border-box;
+}
+  
+/*──────────────── Document Carousel ────────────────*/
+.document-carousel {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
+.carousel-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.preview-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    box-sizing: border-box;
+}
+.preview-content img,
+.preview-content iframe {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+/* Carousel Navigation Buttons */
+.carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 15px;
+    cursor: pointer;
+    z-index: 2;
+    border-radius: 4px;
+}
+.carousel-button.prev {
+    left: 10px;
+}
+.carousel-button.next {
+    right: 10px;
+}
+  
+/*──────────────── Tabs (Chat & Explanation) ────────────────*/
+.tabs-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.tabs {
+    display: flex;
+    width: 100%;
+    border-bottom: 1px solid #ddd;
+    flex-shrink: 0;
+}
+.tab-button {
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+    transition: all 0.3s;
+}
+.tab-button:hover {
+    background-color: #f5f5f5;
+}
+.tab-button.active {
+    border-bottom: 2px solid #2196F3;
+    color: #2196F3;
+}
+.tab-content {
+    flex: 1;
+    display: none;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: 15px;
+    background: #f8f9fa;
+}
+.tab-content.active {
+    display: flex;
+    flex-direction: column;
+}
+  
+/* Chat Messages within Chat Tab */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+}
+  
+/* Chat Input Area */
+.chat-input-container {
+    flex-shrink: 0;
+    background: #f8f9fa;
+    padding: 15px;
+    border-top: 1px solid #dee2e6;
+    margin: 15px -15px -15px -15px;
+}
+.chat-form {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+}
+.chat-input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    resize: none;
+    max-height: 120px;
+    min-height: 45px;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    background: white;
+}
+.chat-input:focus {
+    outline: none;
+    border-color: #2196F3;
+    box-shadow: 0 0 0 2px rgba(33,150,243,0.2);
+}
+.send-button {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.send-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(33,150,243,0.3);
+}
+.send-button:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+  
+/* Chat message bubbles */
+.message {
+    margin: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 70%;
+}
+.message.user {
+    background: #e3f2fd;
+    margin-left: auto;
+}
+.message.ai {
+    background: #f5f5f5;
+    margin-right: auto;
+}
+.message-content {
+    word-wrap: break-word;
+}
+.timestamp {
+    font-size: 0.8em;
+    color: #666;
+    display: block;
+    margin-top: 5px;
+}
+  
+/*──────────────── Fullscreen Overlay ────────────────*/
+.fullscreen-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+.fullscreen-content {
+    width: 90%;
+    height: 90%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.fullscreen-content img,
+.fullscreen-content iframe {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.fullscreen-nav-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 20px;
+    cursor: pointer;
+    font-size: 24px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    z-index: 1001;
+}
+.fullscreen-nav-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+.fullscreen-nav-button.prev {
+    left: 20px;
+}
+.fullscreen-nav-button.next {
+    right: 20px;
+}
+.close-fullscreen {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.zoom-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px;
+    cursor: pointer;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.zoom-button:hover {
+    background: rgba(0, 0, 0, 0.7);
+}
+  
+/*──────────────── Responsive Adjustments ────────────────*/
+@media (max-width: 1200px) {
+    .translation-boxes {
+      grid-template-columns: 45% 55%;
+    }
+}
+@media (max-width: 768px) {
+    .translation-boxes {
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+    .sidebar {
+      width: 200px;
+    }
+    .main-content {
+      margin-left: 200px;
+    }
+}
