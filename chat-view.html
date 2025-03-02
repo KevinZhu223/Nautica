@@ -687,114 +687,11 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            if (localStorage.getItem('token') !== null) {
-                document.querySelector('.sidebar').style.display = 'block';
-                loadUserProjects(); // Load projects from API
-                loadCurrentProject();
-                loadDocumentCarousel();
-                initializeTabs(); // Initialize the tabs
-            } else {
-                window.location.href = 'login.html';
-            }
-        });
+        // Initialize variables at the top
+        let projectFiles = [];
+        let currentPreviewIndex = 0;
 
         async function loadCurrentProject() {
-            const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
-            if (currentChat.projectId) {
-                // Update the project subtitle
-                const projectSubtitle = document.getElementById('currentProjectTitle');
-                projectSubtitle.textContent = currentChat.title || `Project ${currentChat.projectId}`;
-                
-                document.getElementById('documentTitle').textContent = currentChat.title;
-                
-                // Display files in the original content box
-                const originalContent = document.getElementById('originalContent');
-                if (currentChat.files && currentChat.files.length > 0) {
-                    originalContent.innerHTML = `
-                        <h4>Uploaded Files:</h4>
-                        <ul>
-                            ${currentChat.files.map(file => `<li>${file}</li>`).join('')}
-                        </ul>
-                    `;
-                }
-            }
-        }
-
-        // Function to display chat history
-        function displayChatHistory() {
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.innerHTML = '';
-            
-            chatHistory.forEach(message => {
-                const messageElement = document.createElement('div');
-                messageElement.className = `message ${message.sender}`;
-                messageElement.innerHTML = `
-                    <div class="message-content">
-                        <p>${message.text}</p>
-                        <span class="timestamp">${message.timestamp}</span>
-                    </div>
-                `;
-                chatMessages.appendChild(messageElement);
-            });
-            
-            // Scroll to bottom of chat
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        // Function to save chat history
-        function saveChatHistory() {
-            const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
-            const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
-            
-            // Find and update the current project's chat history
-            const projectIndex = projects.findIndex(p => p.title === currentChat.title);
-            if (projectIndex !== -1) {
-                projects[projectIndex].chatHistory = chatHistory;
-                localStorage.setItem('projectList', JSON.stringify(projects));
-                
-                // Update current chat
-                currentChat.chatHistory = chatHistory;
-                localStorage.setItem('currentChat', JSON.stringify(currentChat));
-            }
-        }
-
-        // Handle new messages
-        messageInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                const message = messageInput.value.trim();
-                if (message) {
-                    // Add message to history
-                    chatHistory.push({
-                        text: message,
-                        sender: 'user',
-                        timestamp: new Date().toLocaleTimeString()
-                    });
-                    
-                    // Clear input and update display
-                    messageInput.value = '';
-                    displayChatHistory();
-                    saveChatHistory();
-                    
-                    // Simulate AI response (you can replace this with actual AI integration)
-                    setTimeout(() => {
-                        chatHistory.push({
-                            text: 'This is a sample response.',
-                            sender: 'ai',
-                            timestamp: new Date().toLocaleTimeString()
-                        });
-                        displayChatHistory();
-                        saveChatHistory();
-                    }, 1000);
-                }
-            }
-        });
-
-        let currentDocIndex = 0;
-        let projectFiles = [];
-
-        async function loadDocumentCarousel() {
             const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
             if (currentChat.projectId) {
                 try {
@@ -805,96 +702,21 @@
                     if (response.ok) {
                         const project = await response.json();
                         projectFiles = project.pictures || [];
+                        console.log('Project data:', project); // Debug log
+                        console.log('Project files:', projectFiles); // Debug log
+                        
+                        // Update project title
+                        document.getElementById('currentProjectTitle').textContent = currentChat.title;
+                        
                         if (projectFiles.length > 0) {
-                            showDocument(0);
+                            showPreview(0);
                         }
                     }
                 } catch (error) {
-                    console.error('Error loading documents:', error);
+                    console.error('Error loading project:', error);
                 }
             }
         }
-
-        function showDocument(index) {
-            currentDocIndex = index;
-            const carousel = document.getElementById('documentCarousel');
-            const file = projectFiles[index];
-            
-            carousel.innerHTML = '';
-            
-            if (file.endsWith('.png')) {
-                const iframe = document.createElement('iframe');
-                iframe.src = file;
-                carousel.appendChild(iframe);
-            } else {
-                const img = document.createElement('img');
-                img.src = file;
-                carousel.appendChild(img);
-            }
-            
-            updateDocumentDots();
-            updateDocumentButtons();
-        }
-
-        function updateDocumentDots() {
-            const dotsContainer = document.getElementById('documentDots');
-            dotsContainer.innerHTML = '';
-            
-            projectFiles.forEach((_, index) => {
-                const dot = document.createElement('div');
-                dot.className = `dot${index === currentDocIndex ? ' active' : ''}`;
-                dot.addEventListener('click', () => showDocument(index));
-                dotsContainer.appendChild(dot);
-            });
-        }
-
-        function updateDocumentButtons() {
-            document.getElementById('docPrevBtn').style.display = 
-                currentDocIndex > 0 ? 'block' : 'none';
-            document.getElementById('docNextBtn').style.display = 
-                currentDocIndex < projectFiles.length - 1 ? 'block' : 'none';
-        }
-
-        // Add event listeners
-        document.getElementById('docPrevBtn').addEventListener('click', () => {
-            if (currentDocIndex > 0) showDocument(currentDocIndex - 1);
-        });
-
-        document.getElementById('docNextBtn').addEventListener('click', () => {
-            if (currentDocIndex < projectFiles.length - 1) showDocument(currentDocIndex + 1);
-        });
-
-        // Initialize preview when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
-            if (currentChat.files) {
-                selectedFiles = currentChat.files;
-                if (selectedFiles.length > 0) {
-                    showPreview(0);
-                }
-            }
-        });
-
-        function initializeTabs() {
-            const tabButtons = document.querySelectorAll('.tab-button');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    // Remove active class from all buttons and contents
-                    tabButtons.forEach(btn => btn.classList.remove('active'));
-                    tabContents.forEach(content => content.classList.remove('active'));
-
-                    // Add active class to clicked button and corresponding content
-                    button.classList.add('active');
-                    const tabId = button.dataset.tab;
-                    document.getElementById(tabId).classList.add('active');
-                });
-            });
-        }
-
-        // Add only new carousel functionality
-        let currentPreviewIndex = 0;
 
         function showPreview(index) {
             if (!projectFiles || projectFiles.length === 0) return;
@@ -907,10 +729,15 @@
             if (fileUrl.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/)) {
                 const img = document.createElement('img');
                 img.src = fileUrl;
+                img.style.maxWidth = '100%';
+                img.style.maxHeight = '100%';
+                img.style.objectFit = 'contain';
                 previewContent.appendChild(img);
             } else if (fileUrl.toLowerCase().endsWith('.pdf')) {
                 const iframe = document.createElement('iframe');
                 iframe.src = fileUrl;
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
                 previewContent.appendChild(iframe);
             }
 
@@ -934,9 +761,34 @@
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
             
-            if (prevBtn) prevBtn.style.display = currentPreviewIndex > 0 ? 'block' : 'none';
-            if (nextBtn) nextBtn.style.display = currentPreviewIndex < projectFiles.length - 1 ? 'block' : 'none';
+            prevBtn.style.display = currentPreviewIndex > 0 ? 'block' : 'none';
+            nextBtn.style.display = currentPreviewIndex < projectFiles.length - 1 ? 'block' : 'none';
         }
+
+        // Add event listeners for navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize navigation buttons
+            document.getElementById('prevBtn').addEventListener('click', () => {
+                if (currentPreviewIndex > 0) {
+                    showPreview(currentPreviewIndex - 1);
+                }
+            });
+
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                if (currentPreviewIndex < projectFiles.length - 1) {
+                    showPreview(currentPreviewIndex + 1);
+                }
+            });
+
+            // Load the current project
+            if (localStorage.getItem('token') !== null) {
+                document.querySelector('.sidebar').style.display = 'block';
+                loadUserProjects();
+                loadCurrentProject();
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
 
         // Add keyboard navigation
         document.addEventListener('keydown', (e) => {
