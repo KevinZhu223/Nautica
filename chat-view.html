@@ -239,27 +239,36 @@
             width: 100%;
             height: 400px;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-        }
-
-        .document-carousel img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .document-carousel iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
         }
 
         .carousel-container {
             position: relative;
             width: 100%;
             height: 100%;
+        }
+
+        .preview-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .preview-content img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .preview-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
         .carousel-button {
@@ -275,13 +284,8 @@
             border-radius: 4px;
         }
 
-        .carousel-button.prev {
-            left: 10px;
-        }
-
-        .carousel-button.next {
-            right: 10px;
-        }
+        .carousel-button.prev { left: 10px; }
+        .carousel-button.next { right: 10px; }
 
         .carousel-dots {
             display: flex;
@@ -296,16 +300,10 @@
             border-radius: 50%;
             background: #ddd;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
 
         .dot.active {
             background: #2196F3;
-        }
-
-        .box-content {
-            height: 450px;
-            overflow: hidden;
         }
 
         .preview-container {
@@ -410,6 +408,85 @@
             height: 100%;
             overflow-y: auto;
         }
+
+        /* Carousel styles */
+        .preview-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: white;
+        }
+
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            height: calc(100% - 30px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .carousel-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 15px;
+            cursor: pointer;
+            z-index: 2;
+            border-radius: 4px;
+            font-size: 18px;
+        }
+
+        .carousel-button.prev { left: 10px; }
+        .carousel-button.next { right: 10px; }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 0;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ddd;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .dot.active {
+            background: #2196F3;
+        }
+
+        .preview-content img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .preview-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
     </style>
 </head>
 <body>
@@ -439,7 +516,7 @@
                     <div class="box original-document">
                         <h3>Original Document</h3>
                         <div class="box-content" id="originalContent">
-                            <div id="previewContainer" class="preview-container">
+                            <div class="document-carousel">
                                 <div class="carousel-container">
                                     <button class="carousel-button prev" id="prevBtn">❮</button>
                                     <div id="previewContent" class="preview-content"></div>
@@ -612,7 +689,7 @@
 
         function loadCurrentProject() {
             const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
-            if (currentChat.title) {
+            if (currentChat.projectId) {
                 document.getElementById('documentTitle').textContent = currentChat.title;
                 
                 // Display files in the original content box
@@ -827,6 +904,100 @@
                 });
             });
         }
+
+        // Add only new carousel functionality
+        let currentPreviewIndex = 0;
+
+        function showPreview(index) {
+            if (!projectFiles || projectFiles.length === 0) return;
+            
+            currentPreviewIndex = index;
+            const fileUrl = projectFiles[index];
+            const previewContent = document.getElementById('previewContent');
+            previewContent.innerHTML = '';
+
+            if (fileUrl.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/)) {
+                const img = document.createElement('img');
+                img.src = fileUrl;
+                previewContent.appendChild(img);
+            } else if (fileUrl.toLowerCase().endsWith('.pdf')) {
+                const iframe = document.createElement('iframe');
+                iframe.src = fileUrl;
+                previewContent.appendChild(iframe);
+            }
+
+            updateCarouselDots();
+            updateNavigationButtons();
+        }
+
+        function updateCarouselDots() {
+            const dotsContainer = document.getElementById('carouselDots');
+            dotsContainer.innerHTML = '';
+            
+            projectFiles.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.className = `dot${index === currentPreviewIndex ? ' active' : ''}`;
+                dot.addEventListener('click', () => showPreview(index));
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            if (prevBtn) prevBtn.style.display = currentPreviewIndex > 0 ? 'block' : 'none';
+            if (nextBtn) nextBtn.style.display = currentPreviewIndex < projectFiles.length - 1 ? 'block' : 'none';
+        }
+
+        // Update the loadCurrentProject function to use the new preview system
+        async function loadCurrentProject() {
+            const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
+            if (currentChat.projectId) {
+                try {
+                    const response = await fetch(`${API_ENDPOINTS.projects}${currentChat.projectId}`, {
+                        headers: getAuthHeaders()
+                    });
+                    
+                    if (response.ok) {
+                        const project = await response.json();
+                        projectFiles = project.pictures || [];
+                        document.getElementById('documentTitle').textContent = `Project ${project.id}`;
+                        
+                        if (projectFiles.length > 0) {
+                            showPreview(0);
+                        } else {
+                            document.getElementById('previewContent').innerHTML = 
+                                '<div style="text-align: center; color: #666;">No files available</div>';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading project:', error);
+                }
+            }
+        }
+
+        // Add event listeners for navigation
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentPreviewIndex > 0) {
+                showPreview(currentPreviewIndex - 1);
+            }
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentPreviewIndex < projectFiles.length - 1) {
+                showPreview(currentPreviewIndex + 1);
+            }
+        });
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && currentPreviewIndex > 0) {
+                showPreview(currentPreviewIndex - 1);
+            } else if (e.key === 'ArrowRight' && currentPreviewIndex < projectFiles.length - 1) {
+                showPreview(currentPreviewIndex + 1);
+            }
+        });
     </script>
 </body>
 </html> 
