@@ -1,12 +1,21 @@
 # projects.py
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
-from sqlalchemy.orm import Session
+import io
+import os
+import tempfile
+from io import BytesIO
 from typing import List
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from pdf2image import convert_from_bytes
+from PIL import Image
+from sqlalchemy.orm import Session
 
 from app.core import get_current_active_user, get_db
 from app.db import crud, models
-from app.schemas.project import ProjectCreate, ProjectResponse, MessageCreate, MessageResponse, ProjectUpdate
+from app.schemas.project import (MessageCreate, MessageResponse, ProjectCreate,
+                                 ProjectResponse, ProjectUpdate)
 from app.utils.gcs import upload_file_to_gcs
+from app.utils.genai_helper import explain
 
 router = APIRouter()
 
@@ -75,23 +84,57 @@ def upload_pictures(
     if not project or project.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    # Initialize list to hold new picture URLs
     new_picture_urls = []
+
     for file in files:
-        picture_url = upload_file_to_gcs(file)  # Upload each file and get its URL
-        new_picture_urls.append(picture_url)
-    
-    # Append the new URLs to the project's existing pictures list (or initialize if None)
+        filename = file.filename.lower()
+        ext = os.path.splitext(filename)[1]
+        file_bytes = file.file.read()
+
+        if ext == ".pdf":
+            try:
+                pages = convert_from_bytes(file_bytes)
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=f"Error processing PDF file: {e}")
+            for i, page in enumerate(pages):
+                with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{i}.png") as tmp:
+                    page.save(tmp, format="PNG")
+                    temp_file_path = tmp.name
+                with open(temp_file_path, "rb") as png_file:
+                    picture_url = upload_file_to_gcs(png_file, filename=f"{os.path.splitext(filename)[0]}_page_{i}.png")
+                new_picture_urls.append(picture_url)
+                os.remove(temp_file_path)
+        else:
+            try:
+                image = Image.open(BytesIO(file_bytes))
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=f"Error processing image file: {e}")
+            image = image.convert("RGBA")
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
+                image.save(tmp, format="PNG")
+                temp_file_path = tmp.name
+            with open(temp_file_path, "rb") as png_file:
+                picture_url = upload_file_to_gcs(png_file, filename=f"{os.path.splitext(filename)[0]}.png")
+            new_picture_urls.append(picture_url)
+            os.remove(temp_file_path)
+
+        file.file.seek(0)
+
     if project.pictures is None:
         project.pictures = new_picture_urls
     else:
         project.pictures = project.pictures + new_picture_urls
 
-    print(project.pictures)
+    print("Updated project pictures:", project.pictures)
+    db.commit()
+    db.refresh(project)
 
+    explanation = explain(project)
+    project.explanation = explanation
     db.commit()
     db.refresh(project)
     return project
+
 
 
 @router.post("/{project_id}/messages", response_model=MessageResponse)
