@@ -237,12 +237,12 @@
 <body>
     <div class="app-layout">
         <!-- Sidebar with Project List -->
-        <div class="sidebar">
+        <div class="sidebar" style="display: none;">
             <div class="sidebar-header">
                 <h2>Project List</h2>
             </div>
             <div class="chat-list" id="chatList">
-                <!-- Chat items will be dynamically loaded here -->
+                <!-- Remove static examples -->
             </div>
         </div>
 
@@ -281,25 +281,37 @@
         const chatContainer = document.getElementById('chatContainer');
         const messageInput = document.getElementById('messageInput');
 
+        function isLoggedIn() {
+            return localStorage.getItem('token') !== null;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            loadProjectList();
-            
-            // Load current chat and its history
-            const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
-            if (currentChat.title) {
-                let displayTitle = currentChat.title;
-                if (displayTitle.includes('files)')) {
-                    displayTitle = displayTitle.replace(/\s*\(\d+\s*files\)\s*\(\d+\s*files\)/, ' ($1 files)');
-                }
-                document.getElementById('documentTitle').textContent = displayTitle;
-                
-                // Load chat history if it exists
-                if (currentChat.chatHistory) {
-                    chatHistory = currentChat.chatHistory;
-                    displayChatHistory();
-                }
+            // Show sidebar only if logged in
+            const sidebar = document.querySelector('.sidebar');
+            if (isLoggedIn()) {
+                sidebar.style.display = 'block';
+                loadProjectList();
+                loadCurrentProject();
             }
         });
+
+        function loadCurrentProject() {
+            const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
+            if (currentChat.title) {
+                document.getElementById('documentTitle').textContent = currentChat.title;
+                
+                // Display files in the original content box
+                const originalContent = document.getElementById('originalContent');
+                if (currentChat.files && currentChat.files.length > 0) {
+                    originalContent.innerHTML = `
+                        <h4>Uploaded Files:</h4>
+                        <ul>
+                            ${currentChat.files.map(file => `<li>${file}</li>`).join('')}
+                        </ul>
+                    `;
+                }
+            }
+        }
 
         // Function to display chat history
         function displayChatHistory() {
@@ -410,7 +422,7 @@
             }
         });
 
-        // Function to load project list (same as index.html)
+        // Update loadProjectList to handle project display
         function loadProjectList() {
             const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
             const chatList = document.getElementById('chatList');
@@ -428,6 +440,7 @@
                 chatItem.innerHTML = `
                     <div class="chat-title">${project.title}</div>
                     <div class="chat-date">${project.date}</div>
+                    ${project.files ? `<div class="chat-files">(${project.files.length} files)</div>` : ''}
                     <button class="delete-btn" data-index="${index}">🗑️</button>
                 `;
                 chatList.appendChild(chatItem);

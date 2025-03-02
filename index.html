@@ -623,7 +623,7 @@
         let currentPreviewIndex = 0;
 
         function isLoggedIn() {
-            return localStorage.getItem('userToken') !== null;
+            return localStorage.getItem('token') !== null;
         }
 
         document.querySelector('.upload-button').addEventListener('click', function(e) {
@@ -793,13 +793,21 @@
 
                     const result = await uploadResponse.json();
                     
-                    // Store project info and redirect
-                    localStorage.setItem('currentChat', JSON.stringify({
+                    // Create project info for localStorage
+                    const projectInfo = {
                         title: `Project ${project.id}`,
-                        date: new Date(project.created_at).toLocaleDateString(),
+                        date: new Date().toLocaleDateString(),
                         projectId: project.id,
                         files: selectedFiles.map(f => f.name)
-                    }));
+                    };
+
+                    // Update project list in localStorage
+                    const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
+                    projects.unshift(projectInfo); // Add new project to beginning of list
+                    localStorage.setItem('projectList', JSON.stringify(projects));
+                    
+                    // Store current project info
+                    localStorage.setItem('currentChat', JSON.stringify(projectInfo));
                     
                     window.location.href = 'chat-view.html';
                 } catch (error) {
@@ -889,35 +897,26 @@
             });
         }
 
-        // Add this function at the start of your JavaScript
+        // Update sidebar visibility based on login status
         function updateUIBasedOnLogin() {
-            const isUserLoggedIn = isLoggedIn();
+            const isUserLoggedIn = localStorage.getItem('token') !== null;
             const sidebar = document.querySelector('.sidebar');
             const mainContent = document.querySelector('.main-content');
             
             if (!isUserLoggedIn) {
-                sidebar.classList.add('hidden');
+                sidebar.style.display = 'none';
                 mainContent.classList.add('full-width');
             } else {
-                sidebar.classList.remove('hidden');
+                sidebar.style.display = 'block';
                 mainContent.classList.remove('full-width');
-                loadProjectList(); // Only load projects if logged in
+                loadProjectList();
             }
         }
 
-        // Update your DOMContentLoaded event
+        // Call this when page loads
         document.addEventListener('DOMContentLoaded', function() {
             updateUIBasedOnLogin();
-            
-            // ... rest of your existing DOMContentLoaded code ...
         });
-
-        // Update your loadProjectList function to only run if logged in
-        function loadProjectList() {
-            if (!isLoggedIn()) return;
-            
-            // ... rest of your existing loadProjectList code ...
-        }
 
         // Add click handler for project list items
         document.getElementById('chatList').addEventListener('click', function(e) {
