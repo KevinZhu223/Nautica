@@ -543,7 +543,7 @@
             
             chatList.innerHTML = '';
 
-            projects.forEach((project, index) => {
+            projects.forEach((project) => {
                 const chatItem = document.createElement('div');
                 chatItem.className = 'chat-item';
                 if (project.projectId === currentChat.projectId) {
@@ -554,8 +554,46 @@
                     <div class="chat-title">${project.title}</div>
                     <div class="chat-date">${project.date}</div>
                     ${project.files.length ? `<div class="chat-files">(${project.files.length} files)</div>` : ''}
-                    <button class="delete-btn" data-index="${index}">🗑️</button>
+                    <button class="delete-btn" data-project-id="${project.projectId}">🗑️</button>
                 `;
+
+                // Add click handler for the entire chat item
+                chatItem.addEventListener('click', async (e) => {
+                    // Ignore if clicking delete button
+                    if (e.target.closest('.delete-btn')) return;
+
+                    // Remove active class from all items
+                    document.querySelectorAll('.chat-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+
+                    // Add active class to clicked item
+                    chatItem.classList.add('active');
+
+                    try {
+                        // Fetch project details
+                        const response = await fetch(`${API_ENDPOINTS.projects}${project.projectId}`, {
+                            headers: getAuthHeaders()
+                        });
+
+                        if (response.ok) {
+                            const projectData = await response.json();
+                            // Update currentChat in localStorage
+                            localStorage.setItem('currentChat', JSON.stringify({
+                                projectId: project.projectId,
+                                title: project.title,
+                                date: project.date,
+                                files: projectData.pictures || []
+                            }));
+
+                            // Reload the current project
+                            loadCurrentProject();
+                        }
+                    } catch (error) {
+                        console.error('Error loading project:', error);
+                    }
+                });
+
                 chatList.appendChild(chatItem);
             });
         }
@@ -660,42 +698,31 @@
             }
         });
 
-        // Update click handler for project list items
-        document.getElementById('chatList').addEventListener('click', function(e) {
-            const chatItem = e.target.closest('.chat-item');
-            if (!chatItem) return;
+        // Update delete button handler
+        document.getElementById('chatList').addEventListener('click', async function(e) {
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (!deleteBtn) return;
 
-            if (e.target.closest('.delete-btn')) {
-                e.stopPropagation();
-                const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
-                const index = Array.from(chatList.children).indexOf(chatItem);
-                
-                if (confirm('Are you sure you want to delete this project?')) {
-                    projects.splice(index, 1);
-                    localStorage.setItem('projectList', JSON.stringify(projects));
-                    chatItem.remove();
-                    
-                    // If we're viewing the deleted project, redirect to index
-                    const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
-                    if (currentChat.title === projects[index]?.title) {
-                        window.location.href = 'index.html';
+            e.stopPropagation(); // Prevent triggering the chat item click
+            
+            const projectId = deleteBtn.dataset.projectId;
+            if (confirm('Are you sure you want to delete this project?')) {
+                try {
+                    const response = await fetch(`${API_ENDPOINTS.projects}${projectId}`, {
+                        method: 'DELETE',
+                        headers: getAuthHeaders()
+                    });
+
+                    if (response.ok) {
+                        // Reload projects after deletion
+                        loadUserProjects();
+                    } else {
+                        throw new Error('Failed to delete project');
                     }
+                } catch (error) {
+                    console.error('Error deleting project:', error);
+                    alert('Failed to delete project. Please try again.');
                 }
-            } else {
-                const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
-                const index = Array.from(chatList.children).indexOf(chatItem);
-                const project = projects[index];
-                
-                localStorage.setItem('currentChat', JSON.stringify({
-                    title: project.title,
-                    date: project.date,
-                    fileCount: project.fileCount,
-                    files: project.files,
-                    chatHistory: project.chatHistory || []
-                }));
-                
-                // Reload the page to show the selected chat
-                window.location.reload();
             }
         });
 
@@ -770,72 +797,6 @@
 
         document.getElementById('docNextBtn').addEventListener('click', () => {
             if (currentDocIndex < projectFiles.length - 1) showDocument(currentDocIndex + 1);
-        });
-
-        let currentPreviewIndex = 0;
-        let selectedFiles = [];
-
-        function showPreview(index) {
-            currentPreviewIndex = index;
-            const file = selectedFiles[index];
-            document.getElementById('previewTitle').textContent = 
-                `Preview: ${file.name} (${index + 1}/${selectedFiles.length})`;
-
-            const previewContent = document.getElementById('previewContent');
-            previewContent.innerHTML = '';
-
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.style.maxWidth = '100%';
-                    img.style.maxHeight = '800px';
-                    previewContent.appendChild(img);
-                };
-                reader.readAsDataURL(file);
-            } else if (file.type === 'application/pdf') {
-                const objectUrl = URL.createObjectURL(file);
-                const iframe = document.createElement('iframe');
-                iframe.src = objectUrl;
-                previewContent.appendChild(iframe);
-            } else {
-                previewContent.innerHTML = '<p>Preview not available for this file type</p>';
-            }
-
-            updateCarouselDots();
-            updateNavigationButtons();
-        }
-
-        function updateCarouselDots() {
-            const dotsContainer = document.getElementById('carouselDots');
-            dotsContainer.innerHTML = '';
-
-            selectedFiles.forEach((_, index) => {
-                const dot = document.createElement('div');
-                dot.className = `dot${index === currentPreviewIndex ? ' active' : ''}`;
-                dot.addEventListener('click', () => showPreview(index));
-                dotsContainer.appendChild(dot);
-            });
-        }
-
-        function updateNavigationButtons() {
-            document.getElementById('prevBtn').style.display = 
-                currentPreviewIndex > 0 ? 'block' : 'none';
-            document.getElementById('nextBtn').style.display = 
-                currentPreviewIndex < selectedFiles.length - 1 ? 'block' : 'none';
-        }
-
-        document.getElementById('prevBtn').addEventListener('click', function () {
-            if (currentPreviewIndex > 0) {
-                showPreview(currentPreviewIndex - 1);
-            }
-        });
-
-        document.getElementById('nextBtn').addEventListener('click', function () {
-            if (currentPreviewIndex < selectedFiles.length - 1) {
-                showPreview(currentPreviewIndex + 1);
-            }
         });
 
         // Initialize preview when page loads
