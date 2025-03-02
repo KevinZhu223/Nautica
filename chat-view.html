@@ -20,56 +20,84 @@
           <!-- Project items will be injected here -->
         </div>
       </div>
-      <!-- Main Content -->
+
+      <!-- "No project selected" placeholder -->
       <div class="no-project-container">
-            <div class="no-project-selected">Please select a project.</div>
-      </div>
-      <div class="main-content">
-        <div class="container">
-          <div class="header-section">
-            <button onclick="window.location.href='index.html'" class="back-button">
-              Back to Upload
-            </button>
-            <div class="title-container">
-              <h1>Document Translation</h1>
-              <h2 id="currentProjectTitle" class="project-subtitle"></h2>
-            </div>
-          </div>
-          <div class="translation-boxes">
-            <!-- Left Panel: Original Document Carousel -->
-            <div class="box original-document">
-              <h3>Original Document</h3>
-              <div class="box-content" id="originalContent">
-                <div class="document-carousel">
-                  <div class="carousel-container">
-                    <button class="carousel-button prev" id="prevBtn">❮</button>
-                    <div id="previewContent" class="preview-content"></div>
-                    <button class="carousel-button next" id="nextBtn">❯</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- Right Panel: Explanation (using a simple tab structure) -->
-            <div class="box explanation-box">
-              <div class="tabs-container">
-                <div class="tabs">
-                  <button class="tab-button active" data-tab="explanation">Explanation</button>
-                </div>
-                <div class="tab-content active" id="explanation">
-                  <div class="box-content" id="explanationContent">
-                    <p class="placeholder-text">Explanation will appear here</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- /.translation-boxes -->
+        <div class="no-project-selected">
+          Please select a project.
         </div>
-        <!-- /.container -->
       </div>
-      <!-- /.main-content -->
-    </div>
-    <!-- /.app-layout -->
+
+      <!-- Main Content -->
+      <div class="main-content-container">
+        <div class="main-content">
+          <div class="container">
+            <div class="header-section">
+              <button onclick="window.location.href='index.html'" class="back-button">
+                Back to Upload
+              </button>
+              <div class="title-container">
+                <h1>Document Translation</h1>
+                <h2 id="currentProjectTitle" class="project-subtitle"></h2>
+              </div>
+            </div>
+            
+            <div class="translation-boxes">
+              <!-- LEFT PANEL: Original Document Carousel -->
+              <div class="box original-document">
+                <h3>Original Document</h3>
+                <div class="box-content" id="originalContent">
+                  <div class="document-carousel">
+                    <div class="carousel-container">
+                      <button class="carousel-button prev" id="prevBtn">❮</button>
+                      <div id="previewContent" class="preview-content"></div>
+                      <button class="carousel-button next" id="nextBtn">❯</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- RIGHT PANEL: Explanation and Chat Tabs -->
+              <div class="box explanation-box">
+                <div class="tabs-container">
+                  <div class="tabs">
+                    <!-- Two tabs: Explanation (default) and Chat -->
+                    <button class="tab-button active" data-tab="explanation">Explanation</button>
+                    <button class="tab-button" data-tab="chat">Chat</button>
+                  </div>
+
+                  <!-- Explanation Tab Content -->
+                  <div class="tab-content active" id="explanation">
+                    <div class="box-content" id="explanationContent">
+                      <p class="placeholder-text">Explanation will appear here</p>
+                    </div>
+                  </div>
+
+                  <!-- Chat Tab Content -->
+                  <div class="tab-content" id="chat">
+                    <div class="box-content">
+                      <!-- Where fetched messages get displayed -->
+                      <div id="chatMessages" class="chat-messages"></div>
+                      <!-- A form to send new messages via POST -->
+                      <div class="chat-input-container">
+                        <form id="chatForm" class="chat-form">
+                          <textarea 
+                            id="chatMessageInput" 
+                            class="chat-input"
+                            placeholder="Type your message..."
+                          ></textarea>
+                          <button type="submit" class="send-button">Send</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div><!-- /.tabs-container -->
+              </div><!-- /.explanation-box -->
+            </div><!-- /.translation-boxes -->
+          </div><!-- /.container -->
+        </div><!-- /.main-content -->
+      </div><!-- /.main-content-container -->
+    </div><!-- /.app-layout -->
 
     <!-- Fullscreen Overlay -->
     <div class="fullscreen-overlay" id="fullscreenOverlay">
@@ -80,14 +108,11 @@
     </div>
 
     <script>
-      // API endpoints – update these as needed.
       const API_ENDPOINTS = {
         projects: 'http://34.136.229.253:8080/projects/',
-        upload: 'http://34.136.229.253:8080/projects/{project_id}/upload_pictures',
         messages: 'http://34.136.229.253:8080/projects/{project_id}/messages'
       };
 
-      // Retrieve token headers
       function getAuthHeaders() {
         const token = localStorage.getItem('token');
         const tokenType = localStorage.getItem('token_type') || 'Bearer';
@@ -97,7 +122,7 @@
         };
       }
 
-      // Load the user's projects and update the sidebar
+      // Load the user's projects into the sidebar
       async function loadUserProjects() {
         const token = localStorage.getItem('token');
         if (!token) return;
@@ -107,7 +132,6 @@
           });
           if (response.ok) {
             const projects = await response.json();
-            // Format projects for display
             const formattedProjects = projects.map(project => ({
               title: `Project ${project.id}`,
               date: new Date(project.created_at).toLocaleDateString(),
@@ -129,7 +153,7 @@
         }
       }
 
-      // Build the sidebar list of projects
+      // Populate the sidebar with the projects
       function updateProjectList(projects) {
         const chatList = document.getElementById('chatList');
         const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
@@ -143,11 +167,15 @@
           chatItem.innerHTML = `
             <div class="chat-title">${project.title}</div>
             <div class="chat-date">${project.date}</div>
-            ${project.files.length ? `<div class="chat-files">(${project.files.length} files)</div>` : ''}
+            ${
+              project.files.length
+                ? `<div class="chat-files">(${project.files.length} files)</div>`
+                : ''
+            }
             <button class="delete-btn" data-project-id="${project.projectId}">🗑️</button>
           `;
-          // Click (excluding delete button)
           chatItem.addEventListener('click', function (e) {
+            // Exclude the delete button
             if (!e.target.closest('.delete-btn')) {
               const projectInfo = {
                 projectId: project.projectId,
@@ -156,9 +184,10 @@
               };
               localStorage.setItem('currentChat', JSON.stringify(projectInfo));
               loadCurrentProject();
-              // update active class on sidebar
+              // Mark as active
               document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
               chatItem.classList.add('active');
+              // Hide placeholder, show main content
               document.body.classList.remove('no-project');
               document.querySelector('.no-project-container').style.display = 'none';
               document.querySelector('.main-content-container').style.display = 'block';
@@ -186,11 +215,11 @@
         });
       }
 
-      // Global variables for the carousel and project files
+      // Some global for project images / previews
       let projectFiles = [];
       let currentPreviewIndex = 0;
 
-      // Load current project based on localStorage "currentChat"
+      // Load the selected project's data
       async function loadCurrentProject() {
         const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
         if (currentChat.projectId) {
@@ -200,7 +229,7 @@
             });
             if (response.ok) {
               const project = await response.json();
-              // Update Explanation panel (using Marked.js)
+              // Explanation tab
               if (project.explanation && project.explanation.text) {
                 document.getElementById('explanationContent').innerHTML =
                   marked.parse(project.explanation.text);
@@ -208,17 +237,17 @@
                 document.getElementById('explanationContent').innerHTML =
                   '<p class="placeholder-text">No explanation available</p>';
               }
-              // Update project files for carousel
+              // Carousel images
               projectFiles = project.pictures || [];
-              // Update project title in header
               document.getElementById('currentProjectTitle').textContent = currentChat.title;
-              // Show first preview if files exist
-              if (projectFiles.length) {
+              if (projectFiles.length > 0) {
                 showPreview(0);
               } else {
                 document.getElementById('previewContent').innerHTML =
                   '<p class="placeholder-text">No document preview available</p>';
               }
+              // Load chat messages
+              loadChatMessages(currentChat.projectId);
             }
           } catch (error) {
             console.error('Error loading project:', error);
@@ -226,20 +255,23 @@
         }
       }
 
-      // Display a preview from projectFiles at the given index
+      /*=============================
+        CAROUSEL PREVIEW LOGIC
+      =============================*/
       function showPreview(index) {
         if (!projectFiles.length) return;
         currentPreviewIndex = index;
         const fileUrl = projectFiles[index];
         const previewContainer = document.getElementById('previewContent');
         previewContainer.innerHTML = '';
+
         // Zoom button
         const zoomButton = document.createElement('button');
         zoomButton.className = 'zoom-button';
         zoomButton.textContent = '🔍 Zoom';
         zoomButton.onclick = () => openFullscreen(fileUrl);
         previewContainer.appendChild(zoomButton);
-        // Determine if image or PDF
+
         if (fileUrl.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/)) {
           const img = document.createElement('img');
           img.src = fileUrl;
@@ -252,27 +284,19 @@
         updateNavigationButtons();
       }
 
-      // Update Prev/Next button display based on currentPreviewIndex
       function updateNavigationButtons() {
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
         prevBtn.style.display = currentPreviewIndex > 0 ? 'block' : 'none';
-        nextBtn.style.display =
-          currentPreviewIndex < projectFiles.length - 1 ? 'block' : 'none';
+        nextBtn.style.display = currentPreviewIndex < projectFiles.length - 1 ? 'block' : 'none';
       }
 
-      // Set up carousel navigation buttons
       document.getElementById('prevBtn').addEventListener('click', () => {
-        if (currentPreviewIndex > 0) {
-          showPreview(currentPreviewIndex - 1);
-        }
+        if (currentPreviewIndex > 0) showPreview(currentPreviewIndex - 1);
       });
       document.getElementById('nextBtn').addEventListener('click', () => {
-        if (currentPreviewIndex < projectFiles.length - 1) {
-          showPreview(currentPreviewIndex + 1);
-        }
+        if (currentPreviewIndex < projectFiles.length - 1) showPreview(currentPreviewIndex + 1);
       });
-      // Keyboard navigation for carousel (left/right arrows)
       document.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft' && currentPreviewIndex > 0) {
           showPreview(currentPreviewIndex - 1);
@@ -281,7 +305,9 @@
         }
       });
 
-      // Fullscreen overlay functions
+      /*=============================
+        FULLSCREEN OVERLAY LOGIC
+      =============================*/
       function openFullscreen(fileUrl) {
         const overlay = document.getElementById('fullscreenOverlay');
         const fullscreenContent = document.getElementById('fullscreenContent');
@@ -297,22 +323,19 @@
         }
         overlay.style.display = 'flex';
         updateFullscreenNavButtons();
-        // Attach temporary keydown handler for fullscreen
+
         const handleKeydown = (e) => {
           if (e.key === 'Escape') {
             closeFullscreen();
           } else if (e.key === 'ArrowLeft' && currentPreviewIndex > 0) {
             document.getElementById('fullscreenPrevBtn').click();
-          } else if (
-            e.key === 'ArrowRight' &&
-            currentPreviewIndex < projectFiles.length - 1
-          ) {
+          } else if (e.key === 'ArrowRight' && currentPreviewIndex < projectFiles.length - 1) {
             document.getElementById('fullscreenNextBtn').click();
           }
         };
         document.addEventListener('keydown', handleKeydown);
         overlay.handleKeydown = handleKeydown;
-        // Close if clicking outside content
+
         overlay.onclick = (e) => {
           if (e.target === overlay) closeFullscreen();
         };
@@ -326,8 +349,7 @@
         const prevBtn = document.getElementById('fullscreenPrevBtn');
         const nextBtn = document.getElementById('fullscreenNextBtn');
         prevBtn.style.display = currentPreviewIndex > 0 ? 'block' : 'none';
-        nextBtn.style.display =
-          currentPreviewIndex < projectFiles.length - 1 ? 'block' : 'none';
+        nextBtn.style.display = currentPreviewIndex < projectFiles.length - 1 ? 'block' : 'none';
         prevBtn.onclick = () => {
           if (currentPreviewIndex > 0) {
             currentPreviewIndex--;
@@ -344,36 +366,137 @@
         };
       }
 
-      // On DOM content loaded, check auth and load projects/current project.
-      document.addEventListener('DOMContentLoaded', () => {
-        if (localStorage.getItem('token')) {
-          loadUserProjects();
-          loadCurrentProject();
-        } else {
-          window.location.href = 'login.html';
+      /*=============================
+        CHAT-RELATED LOGIC
+      =============================*/
+      // On tab click, show the correct tab content
+      document.addEventListener('click', (e) => {
+        if (e.target.matches('.tab-button')) {
+          // Remove active from all .tab-button, hide all .tab-content
+          document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+
+          // Activate the correct tab
+          e.target.classList.add('active');
+          const tabId = e.target.dataset.tab;
+          document.getElementById(tabId).classList.add('active');
+
+          // If switching to 'chat', we can re-fetch messages (optional)
+          if (tabId === 'chat') {
+            const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
+            if (currentChat.projectId) {
+              loadChatMessages(currentChat.projectId);
+            }
+          }
         }
       });
-      document.addEventListener('DOMContentLoaded', () => {
-  // Get the stored project info
-  const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
-  // Get references to your two containers:
-  const noProjectContainer = document.querySelector('.no-project-container');
-  const mainContentContainer = document.querySelector('.main-content-container');
 
-  if (!currentChat.projectId) {
-    // No project selected: show placeholder and hide main content
-    document.body.classList.add('no-project');
-    noProjectContainer.style.display = 'flex';
-    mainContentContainer.style.display = 'none';
-  } else {
-    // Project selected: hide placeholder and show main content
-    document.body.classList.remove('no-project');
-    noProjectContainer.style.display = 'none';
-    mainContentContainer.style.display = 'block';
-    loadUserProjects();
-    loadCurrentProject();
-  }
-});
+      // GET messages from /projects/{project_id}/messages
+      async function loadChatMessages(projectId) {
+        try {
+          const url = API_ENDPOINTS.messages.replace('{project_id}', projectId);
+          const res = await fetch(url, { headers: getAuthHeaders() });
+          if (!res.ok) {
+            console.error('Failed to load chat messages for project', projectId);
+            return;
+          }
+          const messages = await res.json();
+          displayChatMessages(messages);
+        } catch (error) {
+          console.error('Error fetching messages:', error);
+        }
+      }
+
+      // Update the UI with chat messages
+      function displayChatMessages(messages) {
+        const chatMessagesEl = document.getElementById('chatMessages');
+        chatMessagesEl.innerHTML = '';
+        messages.forEach(msg => {
+          const messageDiv = document.createElement('div');
+          messageDiv.classList.add('message');
+          // If role "user" or "system/assistant," style differently if you wish:
+          if (msg.role === 'user') {
+            messageDiv.classList.add('user');
+          } else {
+            messageDiv.classList.add('ai'); // or 'assistant'
+          }
+          messageDiv.innerHTML = `
+            <div class="message-content">${msg.message}</div>
+            <span class="timestamp">${new Date(msg.timestamp).toLocaleString()}</span>
+          `;
+          chatMessagesEl.appendChild(messageDiv);
+        });
+        // Auto-scroll to bottom
+        chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+      }
+
+      // POST (send) a new chat message
+      async function sendChatMessage(projectId, role, message) {
+        const url = API_ENDPOINTS.messages.replace('{project_id}', projectId);
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ message, role })
+          });
+          if (res.ok) {
+            const newMsg = await res.json();
+            // Re-load the chat to show the newly added message
+            loadChatMessages(projectId);
+          } else {
+            console.error('Failed to send message. Status:', res.status);
+          }
+        } catch (error) {
+          console.error('Error sending message:', error);
+        }
+      }
+
+      // Chat form submission
+      const chatForm = document.getElementById('chatForm');
+      chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
+        // If no project, do nothing
+        if (!currentChat.projectId) return;
+
+        const messageInput = document.getElementById('chatMessageInput');
+        const text = messageInput.value.trim();
+        if (!text) return;
+
+        // We'll treat the local user as role "user"
+        sendChatMessage(currentChat.projectId, 'user', text);
+        messageInput.value = ''; // Clear input
+      });
+
+      /*=============================
+        PAGE INITIALIZATION
+      =============================*/
+      document.addEventListener('DOMContentLoaded', () => {
+        // If no token, redirect to login
+        if (!localStorage.getItem('token')) {
+          return window.location.href = 'login.html';
+        }
+        // Load project list
+        loadUserProjects();
+        // Attempt to load current project if any
+        loadCurrentProject();
+      });
+
+      // "No project selected" detection
+      document.addEventListener('DOMContentLoaded', () => {
+        const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
+        const noProjectContainer = document.querySelector('.no-project-container');
+        const mainContentContainer = document.querySelector('.main-content-container');
+        if (!currentChat.projectId) {
+          document.body.classList.add('no-project');
+          noProjectContainer.style.display = 'flex';
+          mainContentContainer.style.display = 'none';
+        } else {
+          document.body.classList.remove('no-project');
+          noProjectContainer.style.display = 'none';
+          mainContentContainer.style.display = 'block';
+        }
+      });
     </script>
   </body>
 </html>
