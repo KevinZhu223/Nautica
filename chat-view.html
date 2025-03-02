@@ -47,7 +47,8 @@
         }
 
         .chat-item {
-            padding: 15px;
+            position: relative;
+            padding: 15px 40px 15px 15px;
             border-radius: 8px;
             margin-bottom: 8px;
             cursor: pointer;
@@ -176,11 +177,6 @@
             margin-bottom: 20px;
         }
 
-        .chat-item {
-            position: relative;
-            padding-right: 40px;
-        }
-
         .delete-btn {
             position: absolute;
             right: 10px;
@@ -193,6 +189,7 @@
             transition: opacity 0.2s ease;
             padding: 5px;
             border-radius: 4px;
+            color: #dc3545;
         }
 
         .chat-item:hover .delete-btn {
@@ -205,6 +202,7 @@
 
         .trash-icon {
             font-size: 16px;
+            color: #dc3545;
         }
 
         .message {
@@ -244,19 +242,7 @@
                 <h2>Project List</h2>
             </div>
             <div class="chat-list" id="chatList">
-                <!-- Adding active class to show current selection -->
-                <div class="chat-item">
-                    <div class="chat-title">Spanish Visa Application</div>
-                    <div class="chat-date">Mar 15, 2024</div>
-                </div>
-                <div class="chat-item">
-                    <div class="chat-title">Chinese Birth Certificate</div>
-                    <div class="chat-date">Mar 14, 2024</div>
-                </div>
-                <div class="chat-item">
-                    <div class="chat-title">French Work Permit</div>
-                    <div class="chat-date">Mar 13, 2024</div>
-                </div>
+                <!-- Chat items will be dynamically loaded here -->
             </div>
         </div>
 
@@ -399,6 +385,12 @@
                     projects.splice(index, 1);
                     localStorage.setItem('projectList', JSON.stringify(projects));
                     chatItem.remove();
+                    
+                    // If we're viewing the deleted project, redirect to index
+                    const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
+                    if (currentChat.title === projects[index]?.title) {
+                        window.location.href = 'index.html';
+                    }
                 }
             } else {
                 const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
@@ -422,31 +414,55 @@
         function loadProjectList() {
             const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
             const chatList = document.getElementById('chatList');
-            chatList.innerHTML = '';
+            const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
+            
+            chatList.innerHTML = ''; // Clear existing items
 
-            projects.forEach(project => {
+            projects.forEach((project, index) => {
                 const chatItem = document.createElement('div');
                 chatItem.className = 'chat-item';
-                
-                // Remove the file count if it's already in the title
-                let titleDisplay = project.title;
-                if (!titleDisplay.includes('files)')) {
-                    titleDisplay = project.fileCount > 1 
-                        ? `${project.title} (${project.fileCount} files)` 
-                        : project.title;
+                if (project.title === currentChat.title) {
+                    chatItem.classList.add('active');
                 }
-                
+
                 chatItem.innerHTML = `
-                    <div>
-                        <div class="chat-title">${titleDisplay}</div>
-                        <div class="chat-date">${project.date}</div>
-                    </div>
-                    <button class="delete-btn" title="Delete project">
-                        <span class="trash-icon">🗑️</span>
-                    </button>
+                    <div class="chat-title">${project.title}</div>
+                    <div class="chat-date">${project.date}</div>
+                    <button class="delete-btn" data-index="${index}">🗑️</button>
                 `;
                 chatList.appendChild(chatItem);
             });
+
+            // Add click handlers for delete buttons
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Prevent chat item click
+                    const index = parseInt(this.getAttribute('data-index'));
+                    handleDelete(index);
+                });
+            });
+        }
+
+        // Add this new function to handle deletions
+        function handleDelete(index) {
+            if (confirm('Are you sure you want to delete this project?')) {
+                const projects = JSON.parse(localStorage.getItem('projectList') || '[]');
+                const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
+                const deletedProject = projects[index];
+
+                // Remove the project
+                projects.splice(index, 1);
+                localStorage.setItem('projectList', JSON.stringify(projects));
+
+                // If we're viewing the deleted project, redirect to index
+                if (currentChat.title === deletedProject.title) {
+                    window.location.href = 'index.html';
+                } else {
+                    // Just reload the project list
+                    loadProjectList();
+                }
+            }
         }
     </script>
 </body>

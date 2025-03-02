@@ -131,6 +131,7 @@
         .upload-section {
             text-align: center;
             margin: 20px 0;
+            position: relative;
         }
 
         .upload-button {
@@ -448,6 +449,26 @@
             margin-bottom: 15px;
             color: #bdc3c7;
         }
+
+        /* Add these styles */
+        .login-required-tooltip {
+            display: none;
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+            white-space: nowrap;
+        }
+
+        .not-logged-in .upload-button:hover + .login-required-tooltip {
+            display: block;
+        }
     </style>
 </head>
 
@@ -489,11 +510,12 @@
             </div>
             <div class="container">
                 <h1>Document Assistant</h1>
-                <div class="upload-section">
+                <div class="upload-section ${!isLoggedIn() ? 'not-logged-in' : ''}">
                     <label for="fileUpload" class="upload-button">
                         Choose Documents
                         <input type="file" id="fileUpload" accept="image/*,.pdf,.doc,.docx" multiple hidden>
                     </label>
+                    <div class="login-required-tooltip">Please log in to upload documents</div>
 
                     <div id="fileList" class="file-list"></div>
 
@@ -532,6 +554,19 @@
         const previewContainer = document.getElementById('previewContainer');
         let selectedFiles = [];
         let currentPreviewIndex = 0;
+
+        function isLoggedIn() {
+            return localStorage.getItem('userToken') !== null;
+        }
+
+        document.querySelector('.upload-button').addEventListener('click', function(e) {
+            if (!isLoggedIn()) {
+                e.preventDefault();
+                window.location.href = 'login.html';
+                return;
+            }
+            // If logged in, the hidden file input will work normally
+        });
 
         fileUpload.addEventListener('change', function (e) {
             const newFiles = Array.from(e.target.files);
@@ -648,6 +683,11 @@
         }
 
         processBtn.addEventListener('click', function() {
+            if (!isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
             if (selectedFiles.length > 0) {
                 this.classList.add('processing');
                 this.textContent = 'Processing...';
@@ -705,6 +745,10 @@
         // Handle chat item clicks
         document.querySelectorAll('.chat-item').forEach(item => {
             item.addEventListener('click', function () {
+                if (!isLoggedIn()) {
+                    window.location.href = 'login.html';
+                    return;
+                }
                 const title = this.querySelector('.chat-title').textContent;
                 const date = this.querySelector('.chat-date').textContent;
 
@@ -777,7 +821,13 @@
         }
 
         // Load projects when page loads
-        document.addEventListener('DOMContentLoaded', loadProjectList);
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadSection = document.querySelector('.upload-section');
+            if (!isLoggedIn()) {
+                uploadSection.classList.add('not-logged-in');
+            }
+            loadProjectList();
+        });
 
         // Add click handler for project list items
         document.getElementById('chatList').addEventListener('click', function(e) {
