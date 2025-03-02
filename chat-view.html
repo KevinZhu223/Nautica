@@ -21,6 +21,9 @@
         </div>
       </div>
       <!-- Main Content -->
+      <div class="no-project-container">
+            <div class="no-project-selected">Please select a project.</div>
+      </div>
       <div class="main-content">
         <div class="container">
           <div class="header-section">
@@ -156,6 +159,9 @@
               // update active class on sidebar
               document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
               chatItem.classList.add('active');
+              document.body.classList.remove('no-project');
+              document.querySelector('.no-project-container').style.display = 'none';
+              document.querySelector('.main-content-container').style.display = 'block';
             }
           });
           // Delete button handler
@@ -348,16 +354,26 @@
         }
       });
       document.addEventListener('DOMContentLoaded', () => {
-    const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
-    if (!currentChat.projectId) {
-        document.body.classList.add('no-project');
-        document.querySelector('.container').innerHTML = `<div class="no-project-selected">Please select a project.</div>`;
-    } else {
-        document.body.classList.remove('no-project');
-        loadUserProjects();
-        loadCurrentProject();
-    }
-    });
+  // Get the stored project info
+  const currentChat = JSON.parse(localStorage.getItem('currentChat') || '{}');
+  // Get references to your two containers:
+  const noProjectContainer = document.querySelector('.no-project-container');
+  const mainContentContainer = document.querySelector('.main-content-container');
+
+  if (!currentChat.projectId) {
+    // No project selected: show placeholder and hide main content
+    document.body.classList.add('no-project');
+    noProjectContainer.style.display = 'flex';
+    mainContentContainer.style.display = 'none';
+  } else {
+    // Project selected: hide placeholder and show main content
+    document.body.classList.remove('no-project');
+    noProjectContainer.style.display = 'none';
+    mainContentContainer.style.display = 'block';
+    loadUserProjects();
+    loadCurrentProject();
+  }
+});
     </script>
   </body>
 </html>

@@ -216,6 +216,7 @@ html, body {
     font-size: 1.5rem;
     border: 2px dashed #ccc;
     margin-top: 20px;
+    margin-left: 200px;
     width: calc(100vw - 310px);
 }
   
