@@ -94,6 +94,7 @@
             grid-template-columns: 1fr 1fr;
             gap: 20px;
             margin-top: 30px;
+            height: calc(100vh - 150px);
         }
 
         .box {
@@ -352,6 +353,63 @@
             max-height: 400px;
             object-fit: contain;
         }
+
+        /* Tabs styles */
+        .tabs-container {
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #dee2e6;
+            background: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .tab-button {
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button:hover {
+            background-color: #e9ecef;
+        }
+
+        .tab-button.active {
+            color: #2196F3;
+            border-bottom: 2px solid #2196F3;
+            background-color: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            height: calc(100% - 45px);
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Chat messages styles */
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -377,13 +435,11 @@
                 </div>
                 
                 <div class="translation-boxes">
+                    <!-- Left side - Original Document (Always visible) -->
                     <div class="box original-document">
                         <h3>Original Document</h3>
                         <div class="box-content" id="originalContent">
                             <div id="previewContainer" class="preview-container">
-                                <div class="preview-header">
-                                    <h3 id="previewTitle">Document Preview</h3>
-                                </div>
                                 <div class="carousel-container">
                                     <button class="carousel-button prev" id="prevBtn">❮</button>
                                     <div id="previewContent" class="preview-content"></div>
@@ -393,11 +449,35 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="box translated-document">
-                        <h3>Translated Document</h3>
-                        <div class="box-content" id="translatedContent">
-                            <p class="placeholder-text">Translated content will appear here</p>
+
+                    <!-- Right side - Collapsible Tabs -->
+                    <div class="tabs-container">
+                        <div class="tabs">
+                            <button class="tab-button active" data-tab="chat">Chat</button>
+                            <button class="tab-button" data-tab="explanation">Explanation</button>
+                            <button class="tab-button" data-tab="translation">Translation</button>
+                        </div>
+
+                        <div class="tab-content active" id="chat">
+                            <div class="box-content">
+                                <div id="chatMessages" class="chat-messages"></div>
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="explanation">
+                            <div class="box-content">
+                                <div id="explanationContent">
+                                    <p class="placeholder-text">Explanation will appear here</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="translation">
+                            <div class="box-content">
+                                <div id="translatedContent">
+                                    <p class="placeholder-text">Translated content will appear here</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -486,6 +566,7 @@
                 loadUserProjects(); // Load projects from API
                 loadCurrentProject();
                 loadDocumentCarousel();
+                initializeTabs(); // Initialize the tabs
             } else {
                 window.location.href = 'login.html';
             }
@@ -649,7 +730,7 @@
             
             carousel.innerHTML = '';
             
-            if (file.endsWith('.pdf')) {
+            if (file.endsWith('.png')) {
                 const iframe = document.createElement('iframe');
                 iframe.src = file;
                 carousel.appendChild(iframe);
@@ -767,6 +848,24 @@
                 }
             }
         });
+
+        function initializeTabs() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    // Add active class to clicked button and corresponding content
+                    button.classList.add('active');
+                    const tabId = button.dataset.tab;
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        }
     </script>
 </body>
 </html> 
