@@ -1,0 +1,6 @@
+.venv/*
+.venv/
+.DS_Store
+*.cpython-312.pyc
+.env
+cred.json
